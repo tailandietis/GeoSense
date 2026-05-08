@@ -1,0 +1,67 @@
+﻿@using GeoDa.BlazorWebApp.Views.Bases;
+@using GeoDa.Domain.RegionalForecasts.Models;
+
+<HeaderBase Text=@("Наличие событий с энергией больше заданного порога") Level=4 IsNeedDivider=false />  
+
+<Row Gutter="(16, 16)">
+    <Col Span="18">
+        <Card Size="small" Title=@("Событие") Style="width: 100%;">                 
+            <Body>
+                <Card Id=@GetCardId() Bordered="true" Size="small" 
+                    Style=@($"width: fit-content; text-align:center; border-radius:5px; " + 
+                        $"background-color:{@GetAlarmStateBgTextColor()}; color:{@GetAlarmStateFgTextColor()}") >
+                    @GetAlarmStatusLabel()
+                </Card>
+                @if (EnergyAssessment.Report.IsAlarm)
+                {
+                    <TextBase Text=@GetAlarmEValueLabel() FontSize="14px"/>
+                    <TextBase Text=@GetAlarmDateTimeStamp() FontSize="14px"/>
+                }
+            </Body>              
+        </Card>  
+    </Col>    
+</Row>
+
+<br />
+
+<Row Gutter = "(16, 16)">
+    <Col  Span="18">
+        <Card Size="small" Title=@("Общая информация") Style="width: 100%">                
+            <Body>
+                <TextBase Id=@GetGpnsCountLabelId() Text=@GetGpnsCountLabelLabel() FontSize="14px" />
+                <TextBase Id=@GetAlarmLimitValueLabelId() Text=@GetAlarmLimitValueLabel() FontSize="14px" />
+                <TextBase Id=@GetAlarmCheckIntervalLabelId()  Text=@GetAlarmCheckIntervalLabel() FontSize="14px"/>
+                <TextBase Id=@GetDateTimeAlarmCheckLabelId() Text=@GetDateTimeAlarmCheckLabel() FontSize="14px" />
+            </Body>              
+        </Card>      
+    </Col>
+</Row>
+
+<br />
+
+<Row Gutter = "(16, 16)">
+    <Col Span="18">
+        <Card Size="small" Title=@("События с энергией выше заданного порога") Style="width: 100%">                
+            <Body>
+                <Table TItem="Event" Bordered=@true DataSource="@AlarmEvents" Size="TableSize.Small" HidePagination>
+                    <Column Title="Дата/время" @bind-Field="@context.Dt" Width="40%">
+                        @* <a>@context.Dt</a> *@
+                    </Column>
+                    <Column Title="X" @bind-Field="@context.X" Width="10%" />
+                    <Column Title="Y" @bind-Field="@context.Y" Width="10%" />
+                    <Column Title="Z" @bind-Field="@context.Z" Width="10%" />
+                    <Column Title="E" @bind-Field="@context.E" Width="10%" />
+                </Table>
+                @* <AntList Bordered DataSource="@AlarmEvents" Size="ListSize.Small">
+                    <Header>Header</Header>
+                    <ChildContent Context="item">
+                        <ListItem>
+                            @item
+                        </ListItem>
+                    </ChildContent>
+                    <Footer>Footer</Footer>
+                </AntList> *@
+            </Body>              
+        </Card>      
+    </Col>
+</Row>

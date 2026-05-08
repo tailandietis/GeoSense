@@ -1,0 +1,22 @@
+﻿@page "/rf/{ObjectName}"
+
+@using GeoDa.BlazorWebApp.Views.Components.RegionalForecasts.ExtendedInfoes
+
+@inject IJSRuntime Js
+
+<Button Type="@ButtonType.Text" style="float: right;" @onclick=@(async () => await Js.InvokeVoidAsync("window.print"))>
+    Печать <Icon style="font-size:20px;" Type="printer" Theme="outline" />
+</Button>
+
+<RegionalForecastObjectInfoComponent ObjectName=@ObjectName                                     
+                                     EnergyAssessment=@_energyAssessment 
+                                     AlarmEvents=@_alarmEvents
+                                     GpnsCountInfo=@_gpnsCountInfo
+                                     Statistics=@_objectStatistics
+                                     RfBlocksInfo=@_rfBlocksInfo
+                                     DensityEventsMapImagePath=@_densityEventsMapImagePath
+                                     DensityEventsWithLimitMapImagePath=@_densityEventsWithLimitMapImagePath
+                                     DensityEnergyMapImagePath=@_densityEnergyMapImagePath
+                                     ParamFMapImagePath=@_paramFMapImagePath
+                                     CurrentEnergyMapImagePath=@_totalEnergyMapImagePath
+                                     ParamFBlockSettings=@GetObjectBlocksSettings()/>

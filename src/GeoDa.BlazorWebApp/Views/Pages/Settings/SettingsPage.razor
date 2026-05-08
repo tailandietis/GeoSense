@@ -1,0 +1,13 @@
+﻿@page "/settings"
+@using GeoDa.BlazorWebApp.Views.Bases;
+
+<HeaderBase Text=@GetTitle() Level=2 />
+
+<AuthorizeView Roles="administrator">
+    <Authorized>
+        <UserSettings />
+    </Authorized>
+    <NotAuthorized>
+        <p>Доступ к настройкам имеют только администраторы системы</p>
+    </NotAuthorized>
+</AuthorizeView>

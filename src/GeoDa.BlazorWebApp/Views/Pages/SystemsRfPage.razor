@@ -1,0 +1,18 @@
+@page "/systems/rf"
+
+@using GeoDa.BlazorWebApp.Models.Area.BoardConfigurations
+@using GeoDa.BlazorWebApp.Views.Components.RegionalForecasts.Boards
+
+@if (_boardConfiguration != null)
+{
+    <RegionalForecastBoardComponent @ref="_rfBoard" BoardConfiguration="_boardConfiguration" />
+}
+else
+{
+    <HeaderBase Text="Региональный прогноз" Level="2" />
+    <Alert Type="@AlertType.Warning"
+           Message="Объекты регионального прогноза не настроены"
+           Description="Проверьте конфигурацию в appsettings.json → Modules → RegionalForecast → ObjectsSettings"
+           ShowIcon="true"
+           Style="max-width:600px" />
+}

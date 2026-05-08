@@ -1,0 +1,59 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{26D80ABD-1134-444F-9FF3-2ACE22311E78}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GeoSense.Domain", "src\GeoSense.Domain\GeoDa.Domain.csproj", "{EA97E546-0BA5-4D86-B629-19C32D30FE4D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GeoSense.Application", "src\GeoDa.Application\GeoDa.Application.csproj", "{F781C3A4-1531-40F1-952D-0C5E83B4F3FA}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GeoSense.Database", "src\GeoDa.Database\GeoDa.Database.csproj", "{B510D930-8D99-4E01-9D43-D17DB63F9775}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GeoSense.Infrastructure", "src\GeoDa.Infrastructure\GeoDa.Infrastructure.csproj", "{9C6E1383-0CD2-451A-A602-B1DF91FBC54B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GeoSense.Integrations", "src\GeoDa.Integrations\GeoDa.Integrations.csproj", "{C6DF2125-40A6-4B5D-A9DC-EB898922A634}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GeoSense.BlazorWebApp", "src\GeoDa.BlazorWebApp\GeoDa.BlazorWebApp.csproj", "{37D686E4-B3D5-47AC-8B53-6F8D54FB1C4D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{EA97E546-0BA5-4D86-B629-19C32D30FE4D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EA97E546-0BA5-4D86-B629-19C32D30FE4D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EA97E546-0BA5-4D86-B629-19C32D30FE4D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EA97E546-0BA5-4D86-B629-19C32D30FE4D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F781C3A4-1531-40F1-952D-0C5E83B4F3FA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F781C3A4-1531-40F1-952D-0C5E83B4F3FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F781C3A4-1531-40F1-952D-0C5E83B4F3FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F781C3A4-1531-40F1-952D-0C5E83B4F3FA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B510D930-8D99-4E01-9D43-D17DB63F9775}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B510D930-8D99-4E01-9D43-D17DB63F9775}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B510D930-8D99-4E01-9D43-D17DB63F9775}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B510D930-8D99-4E01-9D43-D17DB63F9775}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9C6E1383-0CD2-451A-A602-B1DF91FBC54B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9C6E1383-0CD2-451A-A602-B1DF91FBC54B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9C6E1383-0CD2-451A-A602-B1DF91FBC54B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9C6E1383-0CD2-451A-A602-B1DF91FBC54B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C6DF2125-40A6-4B5D-A9DC-EB898922A634}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C6DF2125-40A6-4B5D-A9DC-EB898922A634}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C6DF2125-40A6-4B5D-A9DC-EB898922A634}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C6DF2125-40A6-4B5D-A9DC-EB898922A634}.Release|Any CPU.Build.0 = Release|Any CPU
+		{37D686E4-B3D5-47AC-8B53-6F8D54FB1C4D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{37D686E4-B3D5-47AC-8B53-6F8D54FB1C4D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{37D686E4-B3D5-47AC-8B53-6F8D54FB1C4D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{37D686E4-B3D5-47AC-8B53-6F8D54FB1C4D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{EA97E546-0BA5-4D86-B629-19C32D30FE4D} = {26D80ABD-1134-444F-9FF3-2ACE22311E78}
+		{F781C3A4-1531-40F1-952D-0C5E83B4F3FA} = {26D80ABD-1134-444F-9FF3-2ACE22311E78}
+		{B510D930-8D99-4E01-9D43-D17DB63F9775} = {26D80ABD-1134-444F-9FF3-2ACE22311E78}
+		{9C6E1383-0CD2-451A-A602-B1DF91FBC54B} = {26D80ABD-1134-444F-9FF3-2ACE22311E78}
+		{C6DF2125-40A6-4B5D-A9DC-EB898922A634} = {26D80ABD-1134-444F-9FF3-2ACE22311E78}
+		{37D686E4-B3D5-47AC-8B53-6F8D54FB1C4D} = {26D80ABD-1134-444F-9FF3-2ACE22311E78}
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,18 @@
+﻿@inherits LayoutComponentBase
+
+<Layout Style="min-height: 100vh; ">
+    <SidePanel />
+    <Layout Class="site-layout" >
+        <Content Style="margin:0 16px;" >
+            @Body
+        </Content>
+    </Layout>
+</Layout>
+
+
+
+<style>
+    .site-layout .site-layout-background {
+        background: #fff;
+    }
+</style>

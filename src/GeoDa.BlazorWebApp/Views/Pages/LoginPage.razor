@@ -1,0 +1,33 @@
+﻿@page "/login"
+
+@using GeoDa.BlazorWebApp.Views.Bases;
+
+<HeaderBase Text=@GetTitle() Level=2 />
+
+<Row>
+    <Col Span="10">
+        <Card Size="small" Style="width: 100%;">                 
+            <Body>
+                <Card Bordered="true" Size="small" >
+                <Form Model="@_model"
+                      LabelColSpan="8"
+                      OnFinish="OnFinish"
+                      OnFinishFailed="OnFinishFailed">
+                    <FormItem Label="Имя пользователя">
+                        <Input @bind-Value="@context.UserName" />
+                    </FormItem>
+                    <FormItem Label="Пароль">
+                        <InputPassword @bind-Value="@context.Password" />
+                    </FormItem>
+                    <FormItem WrapperColOffset="8" WrapperColSpan="16">
+                        <Button Type="@ButtonType.Primary" HtmlType="submit">
+                            Войти
+                        </Button>
+                    </FormItem>
+                </Form>
+                </Card>
+            </Body>              
+        </Card>  
+    </Col>    
+</Row>
+

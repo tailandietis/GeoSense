@@ -1,0 +1,116 @@
+@page "/ml-dashboard"
+
+@using GeoDa.BlazorWebApp.Services.MLBuilder
+
+<HeaderBase Text="ML Dashboard — Интеллектуальный мониторинг" Level="2" />
+
+<Tabs DefaultActiveKey="train">
+
+    <TabPane Key="train" Tab="Обучение модели">
+        <Space Direction="DirectionVHType.Vertical" Size=@("middle") Style="width:100%">
+
+            <SpaceItem>
+                <Space Size=@("middle") Align="center">
+                    <SpaceItem>
+                        <Button Type="@ButtonType.Primary"
+                                Loading="@_isTraining"
+                                OnClick="TrainModel">
+                            Обучить модель
+                        </Button>
+                    </SpaceItem>
+                    @if (_trainResult != null && _trainResult.Success)
+                    {
+                        <SpaceItem>
+                            <Tag Color="success">Модель обучена</Tag>
+                        </SpaceItem>
+                    }
+                    @if (!string.IsNullOrEmpty(_errorMessage))
+                    {
+                        <SpaceItem>
+                            <Tag Color="error">@_errorMessage</Tag>
+                        </SpaceItem>
+                    }
+                </Space>
+            </SpaceItem>
+
+            @if (_trainResult != null && _trainResult.Success)
+            {
+                <SpaceItem>
+                    <Card Title="XGBoost — классификация уровня риска" Style="max-width:700px">
+                        <Table DataSource="@GetXgbMetrics()" TItem="MetricRow" Size="@TableSize.Small">
+                            <Column Title="Метрика" DataIndex="@nameof(MetricRow.Name)" TData="string" />
+                            <Column Title="Значение" DataIndex="@nameof(MetricRow.Value)" TData="string" />
+                        </Table>
+                    </Card>
+                </SpaceItem>
+
+                <SpaceItem>
+                    <Card Title="Сравнение с пороговыми методами" Style="max-width:700px">
+                        <Table DataSource="@GetBaselineComparison()" TItem="CompareRow" Size="@TableSize.Small">
+                            <Column Title="Метод" DataIndex="@nameof(CompareRow.Method)" TData="string" />
+                            <Column Title="Accuracy" DataIndex="@nameof(CompareRow.Accuracy)" TData="string" />
+                            <Column Title="F1-macro" DataIndex="@nameof(CompareRow.F1Macro)" TData="string" />
+                        </Table>
+                    </Card>
+                </SpaceItem>
+
+                <SpaceItem>
+                    <Card Title="Устойчивость к погрешностям датчиков" Style="max-width:700px">
+                        <Table DataSource="@GetRobustnessRows()" TItem="RobustnessRow" Size="@TableSize.Small">
+                            <Column Title="Шум σ" DataIndex="@nameof(RobustnessRow.Sigma)" TData="string" />
+                            <Column Title="XGBoost F1" DataIndex="@nameof(RobustnessRow.XgbF1)" TData="string" />
+                            <Column Title="Порог энергии F1" DataIndex="@nameof(RobustnessRow.BaselineF1)" TData="string" />
+                        </Table>
+                    </Card>
+                </SpaceItem>
+
+                <SpaceItem>
+                    <Space Size=@("middle") Wrap="true">
+                        @foreach (var plot in _plotFiles)
+                        {
+                            <SpaceItem>
+                                <Card Title="@plot.Key" Style="width:480px">
+                                    <img src="@plot.Value" style="width:100%" />
+                                </Card>
+                            </SpaceItem>
+                        }
+                    </Space>
+                </SpaceItem>
+            }
+        </Space>
+    </TabPane>
+
+    <TabPane Key="anomalies" Tab="Аномалии">
+        <Space Direction="DirectionVHType.Vertical" Size=@("middle") Style="width:100%">
+            <SpaceItem>
+                <Text>Isolation Forest детектирует события, статистически отклоняющиеся от нормального фона.</Text>
+            </SpaceItem>
+            @if (_trainResult != null && _trainResult.Success)
+            {
+                <SpaceItem>
+                    <Card Title="Isolation Forest" Style="max-width:500px">
+                        <Statistic Title="Accuracy (аномалия vs норма)"
+                                   Value="@(_trainResult.IfAccuracy.ToString("P1"))" />
+                        <Statistic Title="F1 (аномалии)"
+                                   Value="@(_trainResult.IfF1.ToString("F3"))" />
+                    </Card>
+                </SpaceItem>
+                <SpaceItem>
+                    @if (_plotFiles.ContainsKey("Anomaly Scores"))
+                    {
+                        <Card Title="Аномальные скоры по классам" Style="width:600px">
+                            <img src="@_plotFiles["Anomaly Scores"]" style="width:100%" />
+                        </Card>
+                    }
+                </SpaceItem>
+            }
+            else
+            {
+                <SpaceItem>
+                    <Text Type="@("secondary")">Обучите модель на вкладке «Обучение модели»</Text>
+                </SpaceItem>
+            }
+        </Space>
+    </TabPane>
+
+</Tabs>

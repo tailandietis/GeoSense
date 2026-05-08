@@ -1,0 +1,136 @@
+@page "/ml-events"
+
+@using GeoDa.BlazorWebApp.Services.MLBuilder
+
+<HeaderBase Text="ML Классификация событий" Level="2" />
+
+<Space Direction="DirectionVHType.Vertical" Size=@("large") Style="width:100%">
+
+    <SpaceItem>
+        <Space Size=@("middle") Align="center" Wrap="true">
+            <SpaceItem>
+                <Button Type="@ButtonType.Primary"
+                        Icon="play-circle"
+                        Loading="_isRunning"
+                        Disabled="!_modelReady"
+                        OnClick="RunPredict">
+                    Запустить классификацию
+                </Button>
+            </SpaceItem>
+            @if (!_modelReady)
+            {
+                <SpaceItem>
+                    <Alert Type="@AlertType.Warning"
+                           Message="Модель не обучена. Перейдите в ML Dashboard."
+                           ShowIcon="true" />
+                </SpaceItem>
+            }
+            @if (!string.IsNullOrEmpty(_errorMessage))
+            {
+                <SpaceItem>
+                    <Alert Type="@AlertType.Error" Message="@_errorMessage" ShowIcon="true" />
+                </SpaceItem>
+            }
+        </Space>
+    </SpaceItem>
+
+    @if (_result != null && _result.Success)
+    {
+        <SpaceItem>
+            <div style="display:flex; gap:16px; flex-wrap:wrap;">
+                <div style="flex:1; min-width:140px;">
+                    <Card>
+                        <Statistic Title="Всего событий" Value="@_result.TotalEvents.ToString()" />
+                    </Card>
+                </div>
+                <div style="flex:1; min-width:140px;">
+                    <Card>
+                        <Statistic Title="Фон (класс 0)"
+                                   Value="@(_result.ClassCounts.GetValueOrDefault("Фон", 0).ToString())"
+                                   ValueStyle="color:#52c41a" />
+                    </Card>
+                </div>
+                <div style="flex:1; min-width:140px;">
+                    <Card>
+                        <Statistic Title="Умеренная + Высокая"
+                                   Value="@((_result.ClassCounts.GetValueOrDefault("Умеренная", 0) + _result.ClassCounts.GetValueOrDefault("Высокая", 0)).ToString())"
+                                   ValueStyle="color:#fa8c16" />
+                    </Card>
+                </div>
+                <div style="flex:1; min-width:140px;">
+                    <Card>
+                        <Statistic Title="Критическая (класс 3)"
+                                   Value="@(_result.ClassCounts.GetValueOrDefault("Критическая", 0).ToString())"
+                                   ValueStyle="color:#f5222d" />
+                    </Card>
+                </div>
+                <div style="flex:1; min-width:140px;">
+                    <Card>
+                        <Statistic Title="Аномалий (IF)"
+                                   Value="@_result.AnomalyCount.ToString()"
+                                   ValueStyle="color:#722ed1" />
+                    </Card>
+                </div>
+            </div>
+        </SpaceItem>
+
+        <SpaceItem>
+            <Card Title="События">
+                <Space Style="margin-bottom:12px;" Size=@("middle") Wrap="true">
+                    <SpaceItem>
+                        <span>Класс:&nbsp;</span>
+                        <Select TItem="int" TItemValue="int"
+                                @bind-Value="_filterClass"
+                                Style="width:180px"
+                                OnSelectedItemChanged="_ => ApplyFilter()">
+                            <SelectOptions>
+                                <SelectOption TItem="int" TItemValue="int" Value="-1" Label="Все классы" />
+                                <SelectOption TItem="int" TItemValue="int" Value="0" Label="Фон" />
+                                <SelectOption TItem="int" TItemValue="int" Value="1" Label="Умеренная" />
+                                <SelectOption TItem="int" TItemValue="int" Value="2" Label="Высокая" />
+                                <SelectOption TItem="int" TItemValue="int" Value="3" Label="Критическая" />
+                            </SelectOptions>
+                        </Select>
+                    </SpaceItem>
+                    <SpaceItem>
+                        <span style="color:#8c8c8c; font-size:13px;">
+                            Показано: @_filtered.Count из @_result.Events.Count
+                        </span>
+                    </SpaceItem>
+                </Space>
+
+                <Table DataSource="@_filtered"
+                       TItem="PredictedEvent"
+                       Size="@TableSize.Small"
+                       PageSize="100">
+                    <Column Title="#" DataIndex="@nameof(PredictedEvent.Index)" TData="int" Width="60" />
+                    <Column Title="Дата / время" DataIndex="@nameof(PredictedEvent.DateTimeStr)" TData="string" Width="160" />
+                    <Column Title="Энергия" DataIndex="@nameof(PredictedEvent.EnergyStr)" TData="string" Width="90" />
+                    <Column Title="X, м" TData="string" Width="80">
+                        @context.X.ToString("F0")
+                    </Column>
+                    <Column Title="Y, м" TData="string" Width="80">
+                        @context.Y.ToString("F0")
+                    </Column>
+                    <Column Title="Z, м" TData="string" Width="80">
+                        @context.Z.ToString("F0")
+                    </Column>
+                    <Column Title="Класс ML" TData="string" Width="140">
+                        <Tag Color="@context.AntdColor">@context.LabelName</Tag>
+                    </Column>
+                    <Column Title="Аномалия (IF)" TData="string" Width="130">
+                        @if (context.IsAnomaly)
+                        {
+                            <Tag Color="error">Аномалия</Tag>
+                        }
+                        else
+                        {
+                            <Tag Color="default">Норма</Tag>
+                        }
+                    </Column>
+                </Table>
+            </Card>
+        </SpaceItem>
+    }
+
+</Space>

@@ -1,0 +1,68 @@
+@page "/rfparamfa"
+@page "/rfparamfa/{ObjectName}"
+
+<HeaderBase Text=@GetTitle() Level=2 />
+
+<Space Direction="DirectionVHType.Vertical" Size=@("middle") Style="max-width:500px">
+
+    <SpaceItem>
+        <Space Size=@("middle") Align="center">
+            <SpaceItem><label style="width:200px;">Имя объекта:</label></SpaceItem>
+            <SpaceItem>
+                <Cascader Options="@_objectNames" @bind-Value="ObjectName" SelectedNodesChanged="OnObjectNameChanged" />
+            </SpaceItem>
+        </Space>
+    </SpaceItem>
+
+    <SpaceItem>
+        <Space Size=@("middle") Align="center">
+            <SpaceItem><label style="width:200px;">Дата расчёта F:</label></SpaceItem>
+            <SpaceItem>
+                <DatePicker TValue="DateTime?" ValueChanged="OnDateCalcFChanged" Picker="@DatePickerType.Date" />
+            </SpaceItem>
+        </Space>
+    </SpaceItem>
+
+    <SpaceItem>
+        <Space Size=@("middle") Align="center">
+            <SpaceItem><label style="width:200px;">Размер блока (м):</label></SpaceItem>
+            <SpaceItem>
+                <Input @bind-Value="@_blockSize" Style="width:150px;" />
+            </SpaceItem>
+        </Space>
+    </SpaceItem>
+
+    <SpaceItem>
+        <Space Size=@("middle") Align="center">
+            <SpaceItem><label style="width:200px;">Время влияния события (дни):</label></SpaceItem>
+            <SpaceItem>
+                <Input @bind-Value="@_timeSpanMinImpact" Style="width:150px;" />
+            </SpaceItem>
+        </Space>
+    </SpaceItem>
+
+    <SpaceItem>
+        <Space Size=@("middle") Align="center">
+            <SpaceItem><label style="width:200px;">Время регистрации (дни):</label></SpaceItem>
+            <SpaceItem>
+                <Input @bind-Value="@_timeSpanReg" Style="width:150px;" />
+            </SpaceItem>
+        </Space>
+    </SpaceItem>
+
+    <SpaceItem>
+        <Space Size=@("middle") Align="center">
+            <SpaceItem><label style="width:200px;">Фоновая энергия (Дж):</label></SpaceItem>
+            <SpaceItem>
+                <Input @bind-Value="@_bgEnergy" Style="width:150px;" />
+            </SpaceItem>
+        </Space>
+    </SpaceItem>
+
+    <SpaceItem>
+        <Button Type="@ButtonType.Primary" Disabled="_isCalcFButtonDisable" OnClick="CalcParamFTime">
+            Рассчитать параметр F и загрузить результат
+        </Button>
+    </SpaceItem>
+
+</Space>

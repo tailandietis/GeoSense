@@ -1,0 +1,10 @@
+﻿@using GeoDa.BlazorWebApp.Models.Gui.Colors;
+
+@if(BgColor == GeoDaColor.Transparent)
+{
+    <p id=@Id style="margin-bottom:5px; font-weight:@FontWeight; font-size:@FontSize; color:@Color;">@Text</p>
+}
+else
+{
+    <p id=@Id style ="margin-bottom:5px; font-weight:@FontWeight; font-size:@FontSize; color:@Color; background:@BgColor;">@Text</p>
+}

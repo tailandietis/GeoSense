@@ -1,0 +1,1 @@
+start GeoDa.BlazorWebApp.exe

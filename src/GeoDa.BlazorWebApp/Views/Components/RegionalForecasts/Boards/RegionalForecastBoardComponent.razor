@@ -1,0 +1,12 @@
+﻿@using GeoDa.BlazorWebApp.Views.Bases;
+
+<HeaderBase Text=@GetTitle() Level=2 />
+
+<Row Gutter="(16, 16)">
+    @foreach(var objName in BoardConfiguration.ObjectNames)
+    {        
+        <AntDesign.Col>
+            <RegionalForecastObjectBoardComponent @ref="RfObjects[objName]" ObjectName=@objName />
+        </AntDesign.Col>
+    }
+</Row>

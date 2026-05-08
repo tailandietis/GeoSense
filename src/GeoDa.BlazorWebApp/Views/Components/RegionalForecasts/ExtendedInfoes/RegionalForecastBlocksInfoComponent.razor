@@ -1,0 +1,48 @@
+﻿@using GeoDa.BlazorWebApp.Views.Bases;
+
+<HeaderBase Text=@("Мониторинг сейсмической активности блоков") Level=4 IsNeedDivider=false />  
+
+<Row Gutter = "(16, 16)">
+    <Col  Span="18">
+        <Card Size="small" Title=@("Общая информация") Style="width: 100%">                
+            <Body>
+                <TextBase Text=@GetBlockSize() FontSize="14px" />
+                <TextBase Text=@GetTimeSpanMinImpactInDays() FontSize="14px" />
+                <TextBase Text=@GetTimeSpanRegInDays() FontSize="14px" />
+                <TextBase Text=@GetBackgroundEnergyValue() FontSize="14px" />
+            </Body>              
+        </Card>      
+    </Col>
+</Row>
+
+<br />
+
+<Row Gutter="(16, 16)">
+    <Col Span="18">
+        <Card Size="small" Title=@("Параметр F") Style="width: 100%;">                 
+            <Body>
+                <Card Bordered="true" Size="small" 
+                    Style=@($"width: fit-content; text-align:center; border-radius:5px; " + 
+                        $"background-color:{@GetBgTextColor(BlocksAssessment.ParamFStatus)}; color:{@GetFgTextColor(BlocksAssessment.ParamFStatus)}") >
+                    @GetParamFStatusLabel()
+                </Card>
+            </Body>              
+        </Card>  
+    </Col>    
+</Row>
+
+<br />
+
+<Row Gutter="(16, 16)">
+    <Col Span="18">
+        <Card Size="small" Title=@("Приведенное значение энергии") Style="width: 100%;">                 
+            <Body>
+                <Card Bordered="true" Size="small" 
+                    Style=@($"width: fit-content; text-align:center; border-radius:5px; " + 
+                        $"background-color:{@GetBgTextColor(BlocksAssessment.CurrentEnergyStatus)}; color:{@GetFgTextColor(BlocksAssessment.CurrentEnergyStatus)}") >
+                    @GetCurrentEnergyStatusLabel()
+                </Card>
+            </Body>              
+        </Card>  
+    </Col>    
+</Row>

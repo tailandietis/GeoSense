@@ -1,0 +1,47 @@
+﻿@page "/archive-alarms"
+@using GeoDa.BlazorWebApp.Views.Bases;
+@using GeoDa.BlazorWebApp.Models.Alarms;
+
+<HeaderBase Text=@GetTitle() Level=2 />
+
+<div>
+    <Space Size=@("middle")>
+        <SpaceItem>
+            <lable style="width:90px;">Источник алармов:</lable>
+            <Cascader Options="@_objectTypes" @bind-Value="_objectType" SelectedNodesChanged="OnAlarmSourceChanged"></Cascader>
+        </SpaceItem>        
+        <SpaceItem>
+            <label style="width:90px;">Имя объекта:</label>
+            <Cascader Options="@_objectNames" @bind-Value="_objectName" SelectedNodesChanged="OnObjectNameChanged"></Cascader>
+        </SpaceItem>        
+    </Space>        
+</div>  
+
+<br />
+
+<div>
+    <Space Size=@("middle")>
+        <SpaceItem>
+            <label style="width:90px;">Дата/время:</label>
+            <RangePicker Format="dd/MM/yyyy HH:mm" TValue="DateTime?[]" ShowTime='@("HH:mm")' OnChange="OnDateChange" /> 
+            @*<Button Disabled="_isGetDataButtonDisable" OnClick="GetDataFromDb">Получить данные</Button>*@
+        </SpaceItem>     
+        <SpaceItem>
+            <Button Disabled="_isGetDataButtonDisable" OnClick="GetDataFromDb">Получить данные</Button>
+        </SpaceItem>
+    </Space>        
+</div>  
+
+<Divider />
+
+<Table TItem="ActiveAlarm" Bordered=@true DataSource="@_archAlarms">
+    <Column Title="Сообщение" @bind-Field="@context.Msg">
+        <a>@context.Msg</a>
+    </Column>
+    <Column Title="Статус" @bind-Field="@context.AlarmStatus">
+        <a>@GetAlarmStatusDescription(@context.AlarmStatus)</a>
+    </Column>
+    <Column Title="Дата/время" @bind-Field="@context.DateTime">
+        <a>@context.DateTime</a>
+    </Column>
+</Table>

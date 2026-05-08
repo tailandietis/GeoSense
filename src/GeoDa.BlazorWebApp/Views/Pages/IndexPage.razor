@@ -1,0 +1,155 @@
+@page "/"
+
+@using GeoDa.BlazorWebApp.Services.MLBuilder
+
+<div style="padding: 24px;">
+
+    <div style="margin-bottom: 24px;">
+        <h2 style="margin:0; font-size:22px; font-weight:600;">GeoSense — Интеллектуальный мониторинг геофизических событий</h2>
+    </div>
+
+    <Row Gutter="(24, 24)">
+
+        <Col Xs="24" Sm="12" Lg="6">
+            <div @onclick='() => Navigate("/systems/rf")' style="cursor:pointer;">
+                <Card Hoverable="true" Style="height:180px;">
+                    <div style="display:flex; flex-direction:column; height:100%; justify-content:space-between;">
+                        <div>
+                            <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+                                <Icon Type="appstore" Theme="outline" Style="font-size:20px; color:#1890ff;" />
+                                <span style="font-weight:600; font-size:15px;">Региональный прогноз</span>
+                            </div>
+                            <div style="font-size:13px; color:#595959;">Объект: РП1</div>
+                            <div style="margin-top:8px;">
+                                @if (_rfConnected)
+                                {
+                                    <Badge Status="processing" Text="Подключено" />
+                                }
+                                else
+                                {
+                                    <Badge Status="error" Text="Нет связи с БД" />
+                                }
+                            </div>
+                        </div>
+                        <a href="/systems/rf" style="font-size:13px;">Перейти →</a>
+                    </div>
+                </Card>
+            </div>
+        </Col>
+
+        <Col Xs="24" Sm="12" Lg="6">
+            <div @onclick='() => Navigate("/ml-dashboard")' style="cursor:pointer;">
+                <Card Hoverable="true" Style="height:180px;">
+                    <div style="display:flex; flex-direction:column; height:100%; justify-content:space-between;">
+                        <div>
+                            <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+                                <Icon Type="robot" Theme="outline" Style="font-size:20px; color:#722ed1;" />
+                                <span style="font-weight:600; font-size:15px;">ML Модель</span>
+                            </div>
+                            @if (_mlResult != null && _mlResult.Success)
+                            {
+                                <Badge Status="success" Text="Модель обучена" />
+                                <div style="margin-top:8px; font-size:13px; color:#595959;">
+                                    <div>Accuracy: @_mlResult.XgbAccuracy.ToString("P1")</div>
+                                    <div>F1-macro: @_mlResult.XgbF1Macro.ToString("F3")</div>
+                                </div>
+                            }
+                            else
+                            {
+                                <Badge Status="default" Text="Модель не обучена" />
+                                <div style="margin-top:8px; font-size:13px; color:#8c8c8c;">Перейдите в ML Dashboard для обучения</div>
+                            }
+                        </div>
+                        <a href="/ml-dashboard" style="font-size:13px;">ML Dashboard →</a>
+                    </div>
+                </Card>
+            </div>
+        </Col>
+
+        <Col Xs="24" Sm="12" Lg="6">
+            <div @onclick='() => Navigate("/event-map")' style="cursor:pointer;">
+                <Card Hoverable="true" Style="height:180px;">
+                    <div style="display:flex; flex-direction:column; height:100%; justify-content:space-between;">
+                        <div>
+                            <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+                                <Icon Type="global" Theme="outline" Style="font-size:20px; color:#13c2c2;" />
+                                <span style="font-weight:600; font-size:15px;">3D Карта событий</span>
+                            </div>
+                            <div style="font-size:13px; color:#595959;">Пространственное распределение сейсмических событий</div>
+                        </div>
+                        <a href="/event-map" style="font-size:13px;">Открыть карту →</a>
+                    </div>
+                </Card>
+            </div>
+        </Col>
+
+        <Col Xs="24" Sm="12" Lg="6">
+            <div @onclick='() => Navigate("/energy-stat")' style="cursor:pointer;">
+                <Card Hoverable="true" Style="height:180px;">
+                    <div style="display:flex; flex-direction:column; height:100%; justify-content:space-between;">
+                        <div>
+                            <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+                                <Icon Type="bar-chart" Theme="outline" Style="font-size:20px; color:#fa8c16;" />
+                                <span style="font-weight:600; font-size:15px;">Статистика энергии</span>
+                            </div>
+                            <div style="font-size:13px; color:#595959;">Анализ энергетической активности по временным интервалам</div>
+                        </div>
+                        <a href="/energy-stat" style="font-size:13px;">Открыть →</a>
+                    </div>
+                </Card>
+            </div>
+        </Col>
+
+    </Row>
+
+    <Row Gutter="(24, 24)" Style="margin-top:0;">
+
+        <Col Xs="24" Lg="12">
+            <Card Title="О системе" Style="margin-top:24px;">
+                <div style="font-size:14px; line-height:1.8; color:#434343;">
+                    <p>
+                        <b>GeoSense</b> — платформа интеллектуального мониторинга геофизических событий,
+                        расширяющая возможности системы <b>GeoDa</b> методами машинного обучения.
+                    </p>
+                    <p>
+                        Система оценивает <b>текущий уровень риска</b> на основе сейсмической активности,
+                        используя алгоритм XGBoost для классификации событий по 4 уровням опасности.
+                        В отличие от детерминированных пороговых методов, ML-подход учитывает
+                        пространственно-временной контекст каждого события.
+                    </p>
+                    <div style="margin-top:8px;">
+                        <Tag Color="blue">XGBoost</Tag>
+                        <Tag Color="purple">Isolation Forest</Tag>
+                        <Tag Color="cyan">Blazor Server</Tag>
+                        <Tag Color="orange">PostgreSQL</Tag>
+                    </div>
+                </div>
+            </Card>
+        </Col>
+
+        <Col Xs="24" Lg="12">
+            <Card Title="Уровни сейсмической опасности" Style="margin-top:24px;">
+                <div style="font-size:14px;">
+                    <div style="display:flex; align-items:center; gap:12px; padding:8px 0; border-bottom:1px solid #f0f0f0;">
+                        <div style="width:14px;height:14px;border-radius:50%;background:#52c41a;flex-shrink:0;"></div>
+                        <div><b>Класс 0 — Фон</b><br/><span style="color:#8c8c8c;font-size:12px;">Щелчки породы, нормальная сейсмическая активность</span></div>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:12px; padding:8px 0; border-bottom:1px solid #f0f0f0;">
+                        <div style="width:14px;height:14px;border-radius:50%;background:#fadb14;flex-shrink:0;"></div>
+                        <div><b>Класс 1 — Умеренный</b><br/><span style="color:#8c8c8c;font-size:12px;">Начальные признаки повышенной активности</span></div>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:12px; padding:8px 0; border-bottom:1px solid #f0f0f0;">
+                        <div style="width:14px;height:14px;border-radius:50%;background:#fa8c16;flex-shrink:0;"></div>
+                        <div><b>Класс 2 — Высокий</b><br/><span style="color:#8c8c8c;font-size:12px;">Пучение почвы, давление на борт выработки</span></div>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:12px; padding:8px 0;">
+                        <div style="width:14px;height:14px;border-radius:50%;background:#f5222d;flex-shrink:0;"></div>
+                        <div><b>Класс 3 — Критический</b><br/><span style="color:#8c8c8c;font-size:12px;">Горный удар, критическая нагрузка на массив</span></div>
+                    </div>
+                </div>
+            </Card>
+        </Col>
+
+    </Row>
+
+</div>

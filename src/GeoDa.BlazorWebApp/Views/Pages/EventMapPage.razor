@@ -1,0 +1,58 @@
+@page "/event-map"
+@page "/event-map/{ObjectName}"
+
+<HeaderBase Text="3D Карта событий" Level="2" />
+
+<Space Direction="DirectionVHType.Vertical" Size=@("middle")>
+
+    <SpaceItem>
+        <Space Size=@("middle") Align="center">
+            <SpaceItem><label style="width:110px;">Имя объекта:</label></SpaceItem>
+            <SpaceItem>
+                <Cascader Options="@_objectNames"
+                          @bind-Value="ObjectName"
+                          SelectedNodesChanged="OnObjectNameChanged" />
+            </SpaceItem>
+        </Space>
+    </SpaceItem>
+
+    <SpaceItem>
+        <Space Size=@("middle") Align="center">
+            <SpaceItem><label style="width:110px;">Период:</label></SpaceItem>
+            <SpaceItem>
+                <RangePicker TValue="DateTime?[]"
+                             @bind-Value="_dateRange"
+                             OnChange="_ => StateHasChanged()"
+                             Picker="@DatePickerType.Date" />
+            </SpaceItem>
+        </Space>
+    </SpaceItem>
+
+    <SpaceItem>
+        <Space Size=@("middle") Align="center">
+            <SpaceItem><label style="width:110px;">Мин. энергия:</label></SpaceItem>
+            <SpaceItem>
+                <AntDesign.InputNumber TValue="double?" @bind-Value="_minEnergy" Min="0" DefaultValue="0" Style="width:150px;" />
+            </SpaceItem>
+        </Space>
+    </SpaceItem>
+
+    <SpaceItem>
+        <Space Size=@("middle")>
+            <SpaceItem>
+                <Button Type="@ButtonType.Primary"
+                        Disabled="@_isGenerateButtonDisabled"
+                        OnClick="GenerateAndOpenMap">
+                    Сгенерировать 3D-карту
+                </Button>
+            </SpaceItem>
+            <SpaceItem>
+                <Button Disabled="@_isSaveButtonDisabled"
+                        OnClick="SaveMap">
+                    Сохранить карту
+                </Button>
+            </SpaceItem>
+        </Space>
+    </SpaceItem>
+
+</Space>

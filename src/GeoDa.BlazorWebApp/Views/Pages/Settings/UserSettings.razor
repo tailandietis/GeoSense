@@ -1,0 +1,54 @@
+﻿@using GeoDa.Domain.Settings.Models;
+
+<HeaderBase Text=@GetTitle() Level=3  IsNeedDivider=false/>
+
+<Row Gutter="(16, 16)">
+    <Col Span="8">
+    <Table TItem="User" Bordered=@true DataSource="@_usersTable" HidePagination=@true 
+        @bind-SelectedRows="SelectedRows">
+            <Selection Key="@context.Name" Type="radio"  />
+            <Column Title="Имя" @bind-Field="@context.Name">                
+            </Column>
+            <Column Title="Роль" @bind-Field="@context.Role">
+            </Column>           
+        </Table>
+    </Col>
+    <Col Span="3">
+        <div id="button-block">
+        <Button Block OnClick="OnAddUser">Добавить</Button>
+            <Button Block OnClick="OnConfigUser" Disabled="@_isConfigButtonDisable">Настроить</Button>            
+            <Button Block OnClick="OnDeleteUser" Disabled="@_isConfigButtonDisable">Удалить</Button>
+        </div>
+    </Col>
+</Row>
+
+<Modal Title="@GetModalTitle()"
+       Visible="@_isModalVisible"
+       OnOk="@OnModalOk"
+       OnCancel="@OnModalCancel">
+    <Form Model="@_userSettings"
+          LabelColSpan="8"
+          WrapperColSpan="16"
+          OnFinish="OnFormFinish"
+          OnFinishFailed="OnFormFinishFailed"
+          @ref="@_form">
+        <FormItem Label="Имя пользователя"  >
+            <Input @bind-Value="@context.Name" Disabled="@_isUserNameDisable"/>
+        </FormItem>
+        <FormItem Label="Пароль">
+            <InputPassword @bind-Value="@context.Password" />
+        </FormItem>
+        <FormItem Label="Подтвердите пароль">
+            <InputPassword @bind-Value="@context.ConfirmPassword" />
+        </FormItem>
+        <FormItem Label="Роль пользователя">
+            <Cascader Options="@_roleNames" @bind-Value="@context.Role" />
+        </FormItem>
+    </Form>
+</Modal>
+
+<style>
+    #button-block > * {
+        margin-bottom: 5px;
+    }
+</style>

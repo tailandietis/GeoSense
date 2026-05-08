@@ -1,0 +1,19 @@
+﻿@page "/help"
+
+@using GeoDa.BlazorWebApp.Views.Bases;
+@using GeoDa.BlazorWebApp.Models.Helps;
+
+<HeaderBase Text=@GetTitle() Level=2 />
+
+<Table TItem="HelpData" Bordered=@true DataSource="@HelpData">
+    <Column Title="№" @bind-Field="@context.Id">
+        @context.Id
+    </Column>
+    <Column Title="Название" @bind-Field="@context.Name">
+    </Column>    
+    <ActionColumn Title="Действие" Width="10%">
+        <Space>
+            <SpaceItem><Button  OnClick="()=>GoToExtViewPage(context.Id)">Просмотр</Button></SpaceItem>
+        </Space>
+    </ActionColumn>
+</Table>

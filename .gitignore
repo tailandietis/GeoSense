@@ -1,0 +1,40 @@
+# Build output
+**/bin/
+**/obj/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+
+# Runtime generated files
+src/GeoDa.BlazorWebApp/wwwroot/data/
+src/GeoDa.BlazorWebApp/wwwroot/img/*.html
+src/GeoDa.BlazorWebApp/tmp/
+src/GeoDa.BlazorWebApp/log-*.txt
+
+# ML builder output (большие файлы, генерируются при запуске)
+mlbuilder/output/
+mlbuilder/__pycache__/
+mlbuilder/**/__pycache__/
+mlbuilder/venv/
+mlbuilder/*.pyc
+
+# appsettings с паролями — не заливаем
+src/GeoDa.BlazorWebApp/appsettings.Production.json
+
+# Logs
+*.log
+*.txt
+geosense_*.log
+
+# Runtime CSV данные
+**/wwwfront/data/
+src/GeoDa.BlazorWebApp/wwwfront/
+
+# Конфиг Claude Code (личный, не для репо)
+CLAUDE.md
+
+# OS
+.DS_Store
+Thumbs.db

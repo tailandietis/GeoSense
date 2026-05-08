@@ -1,0 +1,21 @@
+﻿@using GeoDa.BlazorWebApp.Views.Bases;
+
+<Popover Title=@GetObjectNameLabel() Trigger="@(new AntDesign.Trigger[] { AntDesign.Trigger.Click})">
+     <ContentTemplate>
+         <div>
+            <Button Style="width:50px;" Icon="@IconType.Outline.Setting" Size="@ButtonSize.Large" Disabled />
+            <Button OnClick="OpenInfoPage" Type="@ButtonType.Primary" Style="width:50px;" Icon="@IconType.Outline.Fullscreen" Size="@ButtonSize.Large" />
+            <Button OnClick="OpenArchivePage" Style="width:50px;" Icon="@IconType.Outline.Database" Size="@ButtonSize.Large" Disabled />        
+         </div>
+    </ContentTemplate>
+    <ChildContent>
+         <Card Id=@GetCardId() Size="small" Style=@("width:210px; border-radius:5px; background-color:" + GetCardBgColor() + ";") Bordered>
+            <ChildContent>
+                <TextBase FontSize="14px" Text=@GetObjectNameLabel() Color=@GetTextFgColor() />
+                <TextBase Id=@GetObjectStatusLabelId() Text=@GetEnergyStatusLabel() Color=@GetTextFgColor() />
+                <TextBase Id=@GetELimitLabelId() Text=@GetELimitLabel() Color=@GetTextFgColor() />
+                <TextBase Text=@GetBlocksInfoLabel() Color=@GetTextFgColor() />
+            </ChildContent>
+        </Card>
+    </ChildContent>
+</Popover>

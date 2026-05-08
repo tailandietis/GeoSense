@@ -1,0 +1,42 @@
+﻿@page "/energy-stat"
+@page "/energy-stat/{ObjectName}"
+
+<HeaderBase Text="@GetTitle()" Level="2" />
+
+<div>
+    <Space Size=@("middle")>
+        <SpaceItem>
+            <label style="width:90px;">Имя объекта:</label>
+            <Cascader Options="@_objectNames" @bind-Value="ObjectName" SelectedNodesChanged="OnObjectNameChanged" />
+        </SpaceItem>
+    </Space>
+</div>
+
+<br />
+
+<Space Direction="DirectionVHType.Vertical" Size=@("middle")>
+    <SpaceItem>
+        <label style="width:150px;"><b>Выберите даты периода статистики </b></label>
+    </SpaceItem>
+    <SpaceItem>
+        <label style="width:50px;">От:</label>
+        <DatePicker TValue="DateTime?" ValueChanged="OnDateStartChanged" Picker="@DatePickerType.Date" />
+    </SpaceItem>
+    <SpaceItem>
+        <label style="width:50px;">До:</label>
+        <DatePicker TValue="DateTime?" ValueChanged="OnDateEndChanged" Picker="@DatePickerType.Date" />
+    </SpaceItem>
+    <SpaceItem>
+        <Button Disabled="_isCalculateButtonDisabled" OnClick="CalculateEnergyStatistics">Рассчитать статистику</Button>
+    </SpaceItem>
+    <SpaceItem>
+        <Button Disabled="_isCalculateButtonDisabled" OnClick="DownloadEnergyStatisticsCsv">Загрузить данные</Button>
+    </SpaceItem>
+
+    @if (!string.IsNullOrEmpty(_resultText))
+    {
+        <SpaceItem>
+            <Text Style="white-space: pre-line">@_resultText</Text>
+        </SpaceItem>
+    }
+</Space>

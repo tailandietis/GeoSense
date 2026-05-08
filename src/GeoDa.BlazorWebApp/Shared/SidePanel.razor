@@ -1,0 +1,134 @@
+<Sider Theme="SiderTheme.Light" Collapsible Collapsed=@collapsed OnCollapse=@onCollapse>
+    <div class="logo">
+        <p style="font-size:18px;">GeoSense</p>
+    </div>
+
+    <Menu Theme="MenuTheme.Light" DefaultSelectedKeys=@(new[]{"1"}) Mode="MenuMode.Inline">
+        <MenuItem Key="1" RouterLink="\">
+            <Icon Type="desktop" Theme="outline"/>
+            <span>Главная</span>
+        </MenuItem>
+
+        @{
+            RenderFragment subMenuSystemsTitle =
+                @<span>
+                    <Icon Type="appstore" Theme="outline"/>
+                    <span>Системы</span>
+                </span>;
+        }
+        <SubMenu Key="sub2" TitleTemplate=subMenuSystemsTitle>
+            <MenuItem Key="21" RouterLink="\systems\rf">Региональный прогноз</MenuItem>
+        </SubMenu>
+
+        @{
+            RenderFragment subMenuInstrumentsTitle =
+                @<span>
+                    <Icon Type="experiment" Theme="outline"/>
+                    <span>Инструменты</span>
+                </span>;
+        }
+        <SubMenu Key="sub3" TitleTemplate=subMenuInstrumentsTitle>
+            <MenuItem Key="31" RouterLink="/event-map">
+                <Icon Type="global" Theme="outline"/>
+                <span>3D Карта событий</span>
+            </MenuItem>
+            <MenuItem Key="32" RouterLink="/energy-stat">
+                <Icon Type="bar-chart" Theme="outline"/>
+                <span>Статистика по энергии</span>
+            </MenuItem>
+            <MenuItem Key="33" RouterLink="\rfparamfa">
+                <Icon Type="fund" Theme="outline"/>
+                <span>РП Параметр F</span>
+            </MenuItem>
+            <MenuItem Key="34" RouterLink="\archive">
+                <Icon Type="database" Theme="outline"/>
+                <span>Архив</span>
+            </MenuItem>
+            <MenuItem Key="35" RouterLink="\timework">
+                <Icon Type="clock-circle" Theme="outline"/>
+                <span>Работа системы</span>
+            </MenuItem>
+        </SubMenu>
+
+        @{
+            RenderFragment subMenuMlTitle =
+                @<span>
+                    <Icon Type="robot" Theme="outline"/>
+                    <span>ML</span>
+                </span>;
+        }
+        <SubMenu Key="sub4" TitleTemplate=subMenuMlTitle>
+            <MenuItem Key="41" RouterLink="/ml-dashboard">
+                <Icon Type="experiment" Theme="outline"/>
+                <span>ML Dashboard</span>
+            </MenuItem>
+            <MenuItem Key="42" RouterLink="/ml-events">
+                <Icon Type="table" Theme="outline"/>
+                <span>ML Классификация</span>
+            </MenuItem>
+            <MenuItem Key="43" RouterLink="/ml-vs-geoda">
+                <Icon Type="swap" Theme="outline"/>
+                <span>ML vs GeoDa</span>
+            </MenuItem>
+        </SubMenu>
+
+        <MenuItem Key="6" RouterLink="\help">
+            <Icon Type="read" Theme="outline"/>
+            <span>Справка</span>
+        </MenuItem>
+
+        <AuthorizeView>
+            <Authorized>
+                @{
+                    RenderFragment subMenuUserTitle =
+                    @<span>
+                        <Icon Type="user" Theme="outline" />
+                        <span>@context.User.Identity.Name</span>
+                    </span>;
+                }
+                <SubMenu Key="sub7" TitleTemplate=subMenuUserTitle>
+                    <MenuItem Key="71" RouterLink="\settings">
+                        <Icon Type="setting" Theme="outline" />
+                        <span>Настройка</span>
+                    </MenuItem>
+                    <MenuItem Key="72" OnClick="Logout">
+                        <Icon Type="logout" Theme="outline" />
+                        <span>Выход</span>
+                    </MenuItem>
+                </SubMenu>
+            </Authorized>
+            <NotAuthorized>
+                <MenuItem Key="7" RouterLink="\login">
+                    <Icon Type="user" Theme="outline" />
+                    <span>Вход</span>
+                </MenuItem>
+            </NotAuthorized>
+        </AuthorizeView>
+
+        @if (_isAlarm)
+        {
+            <MenuItem Key="8" RouterLink="\active-alarms">
+                <Icon Type="warning" Style="font-size:15px; color:red;" Theme="fill" />
+                <span style="color:red"><b>ВНИМАНИЕ!</b></span>
+            </MenuItem>
+        }
+    </Menu>
+</Sider>
+
+@code {
+    private bool collapsed;
+
+    private void onCollapse(bool collapsed)
+    {
+        this.collapsed = collapsed;
+    }
+}
+
+<style>
+    .logo {
+        height: 30px;
+        background: rgba(255, 255, 255, 0.2);
+        margin: 10px;
+        text-align: center;
+    }
+</style>

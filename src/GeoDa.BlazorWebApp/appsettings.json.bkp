@@ -1,0 +1,126 @@
+{
+  "Serilog": {
+    "Using": [
+      "Serilog.Sinks.Console"
+    ],
+    "MinimumLevel": "Information",
+    "WriteTo": [
+      {
+        "Name": "Console"
+      }
+    ]
+  },
+  "DbsSettings": {
+    "ConnectionSettings": {
+      "DbPeleng": {
+        "ConnectionString": "Host=localhost;Port=5432;Timeout=1;Database=pelengdb;Username=peleng",
+        "Password": "CfDJ8MPK2gQAI2JDt6otfScCLXL5midhk7dlY7JuOVpNKu5zVyJ3xhRDBpKA-oN8CvI4MMJOfvhYJQ60DD7DOlkwsoqwwgmR9zSVAh8zs43L7t5Cg0r7hzCKdYGg5m_66_Yiuw"
+      },
+      "DbXSeis": {
+        "ConnectionString": "Host=localhost;Port=5432;Timeout=1;Database=xseisdb;Username=xseis",
+        "Password": "CfDJ8MPK2gQAI2JDt6otfScCLXJFxdE75fYTIY2U8cg_KCA9x0UdU3MUI00qfabRI1Ya8MxcJlczJ31xuZstctGM7BZ0lX6QvlJp2_NoPgu34Wi-sTRJd3W2Msu4olOu714Q2w"
+      },
+      "DbGeoDA": {
+        "ConnectionString": "Host=localhost;Port=5432;Timeout=1;Database=geodadb;Username=geoda",
+        "Password": "CfDJ8MPK2gQAI2JDt6otfScCLXKaB1V6J5hyprQcGIXMQzo7849BhZ7o6AfSX70gesNQReHdLRluz31zFniXLZ533nUMYg0V7TaxqkVBagUzj7zhXgbgZvHN_UY1I9xBqvAXMQ"
+      }
+    }
+  },
+  "Modules": {
+    "RegionalForecast": {
+      "DbSettings": {
+        "DbName": "DbPeleng"
+      },
+      "ObjectsSettings": {
+        "РП1": {
+          "AlarmELevel": "100",
+          "AlarmCheckIntervalInDays": "3",
+          "StatCalcIntervalInDays": "6"
+        }
+      },
+      "GeneralSettings": {
+        "AlarmCheckUpdatePeriodInSeconds": "1",
+        "StatCalcUpdatePeriodInSeconds": "2"
+      }
+    },
+    "CurrentForecast": {
+      "DbSettings": {
+        "DbName": "DbXSeis"
+      },
+      "ObjectsSettings": {
+        "ТП1": {
+          "DSliceLL": "0.4",
+          "DSliceHH": "0.6",
+          "DBlockLL": "0.17",
+          "BlockX0": "60",
+          "BlockX1": "100",
+          "BlockY0": "100",
+          "BlockY1": "199",
+          "MaxDValue": "1.1"
+        }
+      },
+      "GeneralSettings": {
+        "FeaturesUpdatePeriodInSeconds": "5"
+      }
+    },
+    "SupportPosts": {
+      "DbSettings": {
+        "DbName": "DbGeoDA"
+      },
+      "ObjectsSettings": {
+        "Лава 1": {
+          "OpcUaServer": "opc.tcp://localhost:55000/",
+          "Tags": {
+            "Стойка 1": "ns=1;s=OPCDACLIENT.opcdaclient.test.s1||атм",
+            "Стойка 2": "ns=1;s=OPCDACLIENT.opcdaclient.test.s2||атм",
+            "Стойка 3": "ns=1;s=OPCDACLIENT.opcdaclient.test.s3||атм",
+            "Стойка 4": "ns=1;s=OPCDACLIENT.opcdaclient.test.s4||атм",
+            "Стойка 5": "ns=1;s=OPCDACLIENT.opcdaclient.test.s5||атм",
+            "Стойка 6": "ns=1;s=OPCDACLIENT.opcdaclient.test.s6||атм",
+            "Стойка 7": "ns=1;s=OPCDACLIENT.opcdaclient.test.s7||атм"
+          }
+        }
+      },
+      "GeneralSettings": {
+        "ReadPeriodInSeconds": "5"
+      }
+    },
+    "Combine": {
+      "DbSettings": {
+        "DbName": "DbGeoDA"
+      },
+      "ObjectsSettings": {
+        "Комбайн Лава 1": {
+          "OPCUAServer": "opc.tcp://localhost:55000/",
+          "Tags": {
+            "Pos": "ns=1;s=OPCDACLIENT.opcdaclient.test.c||м",
+            "Curr1": "ns=1;s=OPCDACLIENT.opcdaclient.test.t1||A",
+            "Curr2": "ns=1;s=OPCDACLIENT.opcdaclient.test.t2||A",
+            "Curr3": "ns=1;s=OPCDACLIENT.opcdaclient.test.t3||A",
+            "Curr4": "ns=1;s=OPCDACLIENT.opcdaclient.test.t4||A"
+          }
+        }
+      },
+      "GeneralSettings": {
+        "ReadPeriodInSeconds": "5"
+      }
+    },
+    "DigitalReper": {
+      "DbSettings": {
+        "DbName": "DbGeoDA"
+      },
+      "ObjectsSettings": {
+        "Репер1": {
+          "OPCUAServer": "opc.tcp://localhost:55000/",
+          "Tags": {
+            "РП1": "ns=1;s=OPCDACLIENT.opcdaclient.test.r||усл.ед."
+          }
+        }
+      },
+      "GeneralSettings": {
+        "ReadPeriodInSeconds": "5"
+      }
+    }
+  },
+  "AllowedHosts": "*"
+}

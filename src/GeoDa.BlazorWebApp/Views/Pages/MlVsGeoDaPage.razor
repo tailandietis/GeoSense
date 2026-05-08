@@ -1,0 +1,113 @@
+@page "/ml-vs-geoda"
+
+<HeaderBase Text="ML vs GeoDa — Сравнение методов оценки риска" Level="2" />
+
+@if (!_hasData)
+{
+    <Alert Type="@AlertType.Info"
+           Message="Данные недоступны"
+           Description="Для отображения сравнения необходимо подключение к базе данных и обученная ML-модель. Убедитесь, что модель обучена в разделе ML Dashboard."
+           ShowIcon="true"
+           Style="max-width:600px; margin-bottom:24px;" />
+}
+
+<Space Direction="DirectionVHType.Vertical" Size=@("large") Style="width:100%">
+
+    <SpaceItem>
+        <Row Gutter="(16,16)">
+            <Col Xs="24" Sm="12" Lg="6">
+                <Card>
+                    <Statistic Title="Всего событий" Value="@_totalEvents.ToString()" />
+                </Card>
+            </Col>
+            <Col Xs="24" Sm="12" Lg="6">
+                <Card>
+                    <Statistic Title="Совпадений оценок"
+                               Value="@(_totalEvents > 0 ? ((double)_matchCount / _totalEvents).ToString("P0") : "—")"
+                               ValueStyle="@(_matchRate >= 0.8 ? "color:#52c41a" : "color:#fa8c16")" />
+                </Card>
+            </Col>
+            <Col Xs="24" Sm="12" Lg="6">
+                <Card>
+                    <Statistic Title="ML выше GeoDa"
+                               Value="@_mlHigherCount.ToString()"
+                               Suffix="событий"
+                               ValueStyle="color:#fa8c16" />
+                </Card>
+            </Col>
+            <Col Xs="24" Sm="12" Lg="6">
+                <Card>
+                    <Statistic Title="GeoDa выше ML"
+                               Value="@_geodaHigherCount.ToString()"
+                               Suffix="событий"
+                               ValueStyle="color:#1890ff" />
+                </Card>
+            </Col>
+        </Row>
+    </SpaceItem>
+
+    <SpaceItem>
+        <Card Title="Фильтры">
+            <Space Size=@("middle") Wrap="true">
+                <SpaceItem>
+                    <span>Период:&nbsp;</span>
+                    <RangePicker TValue="DateTime?[]" @bind-Value="_dateRange" Style="width:280px" />
+                </SpaceItem>
+                <SpaceItem>
+                    <span>Показать:&nbsp;</span>
+                    <Select TItem="string" TItemValue="string"
+                            @bind-Value="_filterMode"
+                            Style="width:180px">
+                        <SelectOptions>
+                            <SelectOption TItem="string" TItemValue="string" Value="@("all")" Label="Все события" />
+                            <SelectOption TItem="string" TItemValue="string" Value="@("mismatch")" Label="Только расхождения" />
+                            <SelectOption TItem="string" TItemValue="string" Value="@("ml_higher")" Label="ML выше GeoDa" />
+                            <SelectOption TItem="string" TItemValue="string" Value="@("geoda_higher")" Label="GeoDa выше ML" />
+                        </SelectOptions>
+                    </Select>
+                </SpaceItem>
+                <SpaceItem>
+                    <Button Type="@ButtonType.Primary" OnClick="LoadData" Loading="_isLoading">
+                        Обновить
+                    </Button>
+                </SpaceItem>
+            </Space>
+        </Card>
+    </SpaceItem>
+
+    <SpaceItem>
+        <Card Title="События">
+            <Table DataSource="@_filteredRows" TItem="ComparisonRow"
+                   Size="@TableSize.Small"
+                   Loading="_isLoading"
+                   PageSize="50">
+                <Column Title="Дата/время" DataIndex="@nameof(ComparisonRow.DateTime)" TData="string" Width="160" />
+                <Column Title="Энергия, Дж" DataIndex="@nameof(ComparisonRow.Energy)" TData="string" Width="120" />
+                <Column Title="X" DataIndex="@nameof(ComparisonRow.X)" TData="string" Width="80" />
+                <Column Title="Y" DataIndex="@nameof(ComparisonRow.Y)" TData="string" Width="80" />
+                <Column Title="Z" DataIndex="@nameof(ComparisonRow.Z)" TData="string" Width="80" />
+                <Column Title="Уровень GeoDa" TData="string" Width="140">
+                    <Tag Color="@context.GeoDaColor">@context.GeoDaLevel</Tag>
+                </Column>
+                <Column Title="Класс ML" TData="string" Width="140">
+                    <Tag Color="@context.MlColor">@context.MlLevel</Tag>
+                </Column>
+                <Column Title="Совпадение" TData="string" Width="110">
+                    @if (context.IsMatch)
+                    {
+                        <Tag Color="success">Совпадает</Tag>
+                    }
+                    else if (context.MlClassIndex > context.GeoDaClassIndex)
+                    {
+                        <Tag Color="warning">ML выше</Tag>
+                    }
+                    else
+                    {
+                        <Tag Color="processing">GeoDa выше</Tag>
+                    }
+                </Column>
+            </Table>
+        </Card>
+    </SpaceItem>
+
+</Space>

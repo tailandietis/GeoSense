@@ -1,0 +1,8 @@
+﻿@page "/methodology/{MethodologyId}"
+
+@switch(MethodologyId)
+{
+    case "1": <MethodologyMs /> break;
+    case "2": <MethodologyMikonGeo /> break;
+    default: <p>"Неизвестный тип методики"</p>; break;
+}

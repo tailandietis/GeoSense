@@ -1,0 +1,17 @@
+﻿@page "/active-alarms"
+@using GeoDa.BlazorWebApp.Views.Bases;
+@using GeoDa.BlazorWebApp.Models.Alarms;
+
+<HeaderBase Text=@GetTitle() Level=2 />
+
+<Table TItem="ActiveAlarm" Bordered=@true DataSource="@_alarms">
+    <Column Title="Сообщение" @bind-Field="@context.Msg">
+        <a>@context.Msg</a>
+    </Column>
+    <Column Title="Статус" @bind-Field="@context.AlarmStatus">
+        <a>@GetAlarmStatusDescription(@context.AlarmStatus)</a>
+    </Column>
+    <Column Title="Дата/время" @bind-Field="@context.DateTime">
+        <a>@context.DateTime</a>
+    </Column>
+</Table>

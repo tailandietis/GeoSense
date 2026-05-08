@@ -1,0 +1,32 @@
+﻿@using GeoDa.BlazorWebApp.Views.Bases;
+
+<HeaderBase Text=@("Отчет") Level=4 IsNeedDivider=false />  
+
+<Row Gutter="(16, 16)">
+    <Col Span="18">
+        <Card Size="small" Style="width: 100%;">                 
+            <Body>
+                <TextBase Id=@GetDateTimeStatCalcLabelId() Text=@GetDateTimeStatCalcLabel() FontSize="14px" />
+                <TextBase Id=@GetStatCalcIntervalLabelId() Text=@GetStatCalcIntervalLabel() FontSize="14px" />
+        </Body>              
+        </Card>  
+    </Col>    
+</Row>
+
+<br />
+
+<Row Gutter="(16, 16)">
+    <Col Span="18">
+        <Card Size="small" Title=@("Статистика") Style="width: 100%;">                 
+            <Body>
+                <TextBase Id=@GetMinEValueLabelId() Text=@GetMinEValueLabel() FontSize="14px"/>              
+                <TextBase Id=@GetMaxEValueLabelId() Text=@GetMaxEValueLabel() FontSize="14px"/>       
+                <TextBase Id=@GetQ70LabelId() Text=@GetQ70Label() FontSize="14px"/>       
+                <TextBase Id=@GetQ80LabelId() Text=@GetQ80Label() FontSize="14px"/>       
+                <TextBase Id=@GetQ90LabelId() Text=@GetQ90Label() FontSize="14px"/>       
+                <TextBase Id=@GetQ95LabelId() Text=@GetQ95Label() FontSize="14px"/>       
+                <TextBase Id=@GetQ99LabelId() Text=@GetQ99Label() FontSize="14px"/>       
+            </Body>              
+        </Card>  
+    </Col>    
+</Row>

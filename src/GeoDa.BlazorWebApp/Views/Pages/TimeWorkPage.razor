@@ -1,0 +1,38 @@
+﻿@page "/timework"
+@page "/timework/{ObjectName}"
+
+<HeaderBase Text=@GetTitle() Level=2 />
+
+<div>
+    <Space Size=@("middle")>
+        <SpaceItem>
+            <label style="width:90px;">Имя объекта:</label>
+            <Cascader Options="@_objectNames" @bind-Value="ObjectName" SelectedNodesChanged="OnObjectNameChanged"></Cascader>
+        </SpaceItem>
+    </Space>
+</div>
+
+<br />
+
+<Space Direction="DirectionVHType.Vertical" Size=@("middle")>
+    <SpaceItem>
+        <label style="width:150px;"><b>Выберите интервал</b></label>
+    </SpaceItem>
+    <SpaceItem>
+        <label style="width:50px;">От:</label>
+        <DatePicker TValue="DateTime?" ValueChanged="OnDateStartChanged" Picker="@DatePickerType.Date" />
+        <label style="width:50px;">00:00:00</label>
+    </SpaceItem>
+    <SpaceItem>
+        <label style="width:50px;">До:</label>
+        <DatePicker TValue="DateTime?" ValueChanged="OnDateEndChanged" Picker="@DatePickerType.Date" />
+        <label style="width:50px;">23:59:59</label>
+    </SpaceItem>
+    <SpaceItem>
+        <Button Disabled="_isGetDataButtonDisable" OnClick="CalcWorkTime">Определить время работы</Button>
+    </SpaceItem>
+    <SpaceItem>
+        <Text>Расчётное время работы системы (мин): </Text>
+        <Text>@_workTime</Text>
+    </SpaceItem>
+</Space>

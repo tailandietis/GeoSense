@@ -1,0 +1,35 @@
+﻿@using GeoDa.BlazorWebApp.Views.Bases;
+
+<HeaderBase Text=@GetTitle() Level=2 />
+<HeaderBase Text=@GetObjectNameLabel() Level=3 IsNeedDivider=false />
+
+<Divider />
+<RegionalForecastInfoAlarmStatusComponent EnergyAssessment=@EnergyAssessment.Data
+    GpnsCountInfo=@GpnsCountInfo.Data ObjectStatus=@EnergyAssessment.ObjectStatus AlarmEvents=@AlarmEvents.Data/>
+
+<Divider />
+<RegionalForecastMapComponent Title=@GetDensityEventsMapTitle() ImagePath=@GetDensityEventsMapImagePath() />
+
+<Divider />
+<RegionalForecastMapComponent Title=@GetDensityEventsWithLimitMapTitle()
+                                     ImagePath=@GetDensityEventsWithLimitMapImagePath() />
+<Divider />
+<RegionalForecastMapComponent Title=@GetDensityEnergyMapTitle() ImagePath=@GetDensityEnergyMapImagePath() />
+
+<Divider />
+<RegionalForecastInfoStatCalcComponent Statistics=@Statistics.Data
+                                       ObjectStatus=@Statistics.ObjectStatus />
+
+<Divider />
+<RegionalForecastBlocksInfoComponent BlocksAssessment=@RfBlocksInfo.Data.BlocksAssessment 
+    ParamFBlockSettings=@ParamFBlockSettings
+    ObjectStatus=@RfBlocksInfo.ObjectStatus />
+
+<Divider />
+<RegionalForecastMapComponent Title=@GetParamFMapTitle() ImagePath=@GetParamFMapImagePath() />
+
+<Divider />
+<RegionalForecastMapComponent Title=@GetCurrentEnergyMapTitle() ImagePath=@GetCurrentEnergyMapImagePath() />
+
+
+<br />

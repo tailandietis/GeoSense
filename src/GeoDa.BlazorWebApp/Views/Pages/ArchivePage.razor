@@ -1,0 +1,130 @@
+﻿@page "/archive"
+@page "/archive/{ObjectType}/{ObjectName}"
+@using GeoDa.BlazorWebApp.Views.Components.RegionalForecasts.ExtendedInfoes
+@using GeoDa.Domain.GeneralForecasts.Models
+@using GeoDa.Domain.Models
+@using GeoDa.Domain.RegionalForecasts.Models
+
+@inject IJSRuntime Js
+
+<Button Type="@ButtonType.Text" style="float: right;" @onclick=@(async () => await Js.InvokeVoidAsync("window.print"))>
+    Печать <Icon style="font-size:20px;" Type="printer" Theme="outline"/>
+</Button>  
+
+<HeaderBase Text=@GetTitle() Level=2 />
+
+<div>    
+    <label style="width:90px;">Тип прогноза:</label>
+    <Cascader Options="@_objectTypes" @bind-Value="ObjectType" SelectedNodesChanged="OnForecastChanged"></Cascader>
+</div>
+
+<br />
+
+<div>
+    <Space Size=@("middle")>
+        <SpaceItem>
+            <label style="width:90px;">Имя объекта:</label>
+            <Cascader Options="@_objectNames" @bind-Value="ObjectName" SelectedNodesChanged="OnObjectNameChanged"></Cascader>
+        </SpaceItem>
+    </Space>        
+</div>    
+
+<br />
+
+<div>
+    <Space Size=@("middle")>
+        <SpaceItem>
+            <label style="width:90px;">Тип архива:</label>
+            <Cascader Options="@_archiveTypes" @bind-Value="ArchiveType" SelectedNodesChanged="OnArchiveTypeChanged"></Cascader>
+        </SpaceItem>
+    </Space>
+</div>
+
+<br />
+
+
+@if (ObjectType == "rf")
+{
+    if(ArchiveType == "paramf")
+    {
+        <Space Direction="DirectionVHType.Vertical"  Size=@("middle")>        
+            <SpaceItem>
+                <Button OnClick="GetDataAndBuildReport">Загрузить данные</Button>
+            </SpaceItem>
+        </Space>
+    }
+    else if(ArchiveType == "events")
+    {
+        <Space Direction="DirectionVHType.Vertical"  Size=@("middle")>        
+            <SpaceItem>            
+                <label style="width:150px;"><b>Выберете интервал</b></label>
+            </SpaceItem>
+            <SpaceItem>
+                <label style="width:50px;">От:</label>
+                <DatePicker TValue="DateTime?" ValueChanged="OnDateStartChanged" Picker="@DatePickerType.Date" />
+            </SpaceItem>
+            <SpaceItem>
+                <label style="width:50px;">До:</label>
+                <DatePicker TValue="DateTime?" ValueChanged="OnDateEndChanged" Picker="@DatePickerType.Date" />
+            </SpaceItem>       
+            <SpaceItem>
+                <label style="width:100px;">Мин. уровень энергии:</label>
+                <AntDesign.InputNumber @bind-Value="_minEnergy" />
+            </SpaceItem>
+            <SpaceItem>
+                <Button Disabled="_isGetDataButtonDisable" OnClick="GetDataAndBuildReport">Загрузить данные</Button>
+            </SpaceItem>
+        </Space>
+    }
+    else
+    {
+        <Space Direction="DirectionVHType.Vertical"  Size=@("middle")>        
+            <SpaceItem>            
+                <label style="width:150px;"><b>Выберете интервал</b></label>
+            </SpaceItem>
+            <SpaceItem>
+                <label style="width:50px;">От:</label>
+                <DatePicker TValue="DateTime?" ValueChanged="OnDateStartChanged" Picker="@DatePickerType.Date" />
+            </SpaceItem>
+            <SpaceItem>
+                <label style="width:50px;">До:</label>
+                <DatePicker TValue="DateTime?" ValueChanged="OnDateEndChanged" Picker="@DatePickerType.Date" />
+            </SpaceItem>        
+            <SpaceItem>
+                <Button Disabled="_isGetDataButtonDisable" OnClick="GetDataAndBuildReport">Загрузить данные</Button>
+            </SpaceItem>
+        </Space>
+    }    
+}
+
+<br />
+
+@RenderObjectInfoBlock()
+
+@code
+{
+    RenderFragment BuildRegionalForecastObjectInfo(
+        string objectName, 
+        (ObjectStatus Status, EnergyAssessment Data) energyAssessment,
+        (ObjectStatus Status, ObjectStatistics Data) statistics) =>
+        @<div>
+        <RegionalForecastObjectInfoComponent ObjectName=@objectName EnergyAssessment=@energyAssessment
+                                             Statistics=@statistics />
+        </div>;
+
+
+    RenderFragment BuildNoDataRenderFragment() =>
+    @<div>
+        <Divider />
+        <TextBase Text=@("Нет данных") FontSize="20px"/>
+    </div>;
+
+    RenderFragment BuildRenderFragmentWithText(string text) =>
+    @<div>
+        <Divider />
+        <TextBase Text=@(text) FontSize="20px" />
+    </div>;
+
+    RenderFragment BuildBlankRenderFragment() =>
+        @<div></div>;
+}
