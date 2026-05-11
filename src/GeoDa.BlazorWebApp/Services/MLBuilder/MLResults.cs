@@ -86,6 +86,7 @@ public class MLPredictResult
     public string? ErrorMessage { get; set; }
     public int TotalEvents { get; set; }
     public int AnomalyCount { get; set; }
+    public int SlowAnomalyCount { get; set; }
     public Dictionary<string, int> ClassCounts { get; set; } = new();
     public List<PredictedEvent> Events { get; set; } = new();
 
@@ -104,6 +105,7 @@ public class MLPredictResult
             {
                 result.TotalEvents = summary.TryGetProperty("total_events", out var v) ? v.GetInt32() : 0;
                 result.AnomalyCount = summary.TryGetProperty("anomaly_count", out v) ? v.GetInt32() : 0;
+                result.SlowAnomalyCount = summary.TryGetProperty("slow_anomaly_count", out v) ? v.GetInt32() : 0;
                 if (summary.TryGetProperty("class_counts", out var cc))
                 {
                     foreach (var p in cc.EnumerateObject())
@@ -129,6 +131,7 @@ public class MLPredictResult
                         LabelColor= e.TryGetProperty("label_color",out v)     ? v.GetString() ?? "" : "",
                         IsAnomaly = e.TryGetProperty("is_anomaly", out v) && v.GetBoolean(),
                         AnomalyScore = e.TryGetProperty("anomaly_score", out v) ? v.GetDouble() : 0,
+                        IsSlowAnomaly = e.TryGetProperty("is_slow_anomaly", out v) && v.GetBoolean(),
                     });
                 }
             }
@@ -156,6 +159,7 @@ public class PredictedEvent
     public string LabelColor { get; set; } = "";
     public bool IsAnomaly { get; set; }
     public double AnomalyScore { get; set; }
+    public bool IsSlowAnomaly { get; set; }
 
     public string DateTimeStr
     {
@@ -163,9 +167,13 @@ public class PredictedEvent
         {
             try
             {
-                var date = DateOnly.FromDayNumber((int)(Idat - 2415019));
-                var time = TimeOnly.FromTimeSpan(TimeSpan.FromSeconds(Itim));
-                return $"{date:dd.MM.yyyy} {time:HH:mm:ss}";
+                int year  = 2000 + (int)(Idat / 10000);
+                int month = (int)(Idat / 100 % 100);
+                int day   = (int)(Idat % 100);
+                int hour  = (int)(Itim / 10000);
+                int min   = (int)(Itim / 100 % 100);
+                int sec   = (int)(Itim % 100);
+                return $"{day:D2}.{month:D2}.{year} {hour:D2}:{min:D2}:{sec:D2}";
             }
             catch { return $"{Idat} / {Itim}"; }
         }

@@ -60,6 +60,8 @@ public class Startup
 
         services.Configure<MLBuilderSettings>(_configuration.GetSection("MLBuilder"));
         services.AddScoped<IMLBuilderService, MLBuilderService>();
+        services.AddScoped<MLObjectStateService>();
+        services.AddScoped<XSeisContextService>();
 
         services.AddSwaggerGen(c =>
         {
@@ -75,6 +77,12 @@ public class Startup
         });
 
         services.AddAntDesign();
+
+        services.Configure<HostOptions>(options =>
+        {
+            options.BackgroundServiceExceptionBehavior =
+                Microsoft.Extensions.Hosting.BackgroundServiceExceptionBehavior.Ignore;
+        });
 
         services.AddHostedService<GeoDaWebAppHostedService>();
         services.AddSingleton<IObserverService, ObserverService>();

@@ -11,10 +11,10 @@ class EnergyThresholds:
 
 @dataclass
 class EmulatorSettings:
-    n_background: int = 3000
-    n_level1: int = 800
-    n_level2: int = 150
-    n_level3: int = 50
+    n_background: int = 5400   # 60% от 9000
+    n_level1: int = 1800       # 20%
+    n_level2: int = 1080       # 12%
+    n_level3: int = 720        # 8%
     x_range: tuple = (50, 350)
     y_range: tuple = (50, 350)
     z_range: tuple = (-400, -50)

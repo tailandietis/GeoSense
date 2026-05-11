@@ -36,9 +36,16 @@ def predict(events_path: str, model_path: str, iso_path: str, output_path: str):
     labels = xgb.predict(X).tolist()
     probs = xgb.predict_proba(X).tolist()
 
+    # Уровень 1: точечные аномалии (быстрые процессы)
     anomaly_scores = None
     if iso is not None:
         anomaly_scores = iso.score_samples(X).tolist()
+
+    # Уровень 2: протяжённые аномалии (медленные процессы)
+    slow_anomaly_flags = _detect_slow_anomalies(df_raw, window_hours=6, zscore_threshold=2.0)
+    slow_anomaly_count = int(slow_anomaly_flags.sum())
+    if slow_anomaly_count > 0:
+        print(f"Протяжённых аномалий (медленные процессы): {slow_anomaly_count} событий")
 
     results = []
     for i in range(len(df_raw)):
@@ -61,10 +68,13 @@ def predict(events_path: str, model_path: str, iso_path: str, output_path: str):
                 "class_2": round(probs[i][2], 4),
                 "class_3": round(probs[i][3], 4),
             },
+            "is_slow_anomaly": bool(slow_anomaly_flags.iloc[i]),
         }
         if anomaly_scores is not None:
             entry["anomaly_score"] = round(anomaly_scores[i], 4)
-            entry["is_anomaly"] = anomaly_scores[i] < np.percentile(anomaly_scores, 5)
+            entry["is_anomaly"] = bool(anomaly_scores[i] < np.percentile(anomaly_scores, 5))
+        else:
+            entry["is_anomaly"] = False
 
         results.append(entry)
 
@@ -75,6 +85,7 @@ def predict(events_path: str, model_path: str, iso_path: str, output_path: str):
             for i in range(4)
         },
         "anomaly_count": int(sum(1 for r in results if r.get("is_anomaly", False))),
+        "slow_anomaly_count": slow_anomaly_count,
     }
 
     output = {"summary": summary, "events": results}
@@ -88,7 +99,68 @@ def predict(events_path: str, model_path: str, iso_path: str, output_path: str):
     for name, count in summary["class_counts"].items():
         print(f"  {name}: {count}")
     if summary["anomaly_count"] > 0:
-        print(f"Аномалий (IF): {summary['anomaly_count']}")
+        print(f"Точечных аномалий (IF): {summary['anomaly_count']}")
+    if slow_anomaly_count > 0:
+        print(f"Протяжённых аномалий: {slow_anomaly_count}")
+
+
+def _detect_slow_anomalies(df_raw: pd.DataFrame,
+                            window_hours: int = 6,
+                            zscore_threshold: float = 2.0) -> pd.Series:
+    """
+    Детектирование протяжённых аномалий — медленных геофизических процессов.
+
+    Алгоритм:
+    1. Группируем события в временные окна (по умолчанию 6 часов).
+    2. Для каждого окна вычисляем агрегаты: число событий, суммарная энергия.
+    3. Окно считается аномальным, если его показатели отклоняются от среднего
+       более чем на zscore_threshold стандартных отклонений (z-score > threshold).
+    4. Все события внутри аномального окна помечаются как is_slow_anomaly=True.
+
+    Физический смысл: медленные процессы (накопление напряжений, активизация зоны)
+    проявляются не отдельными событиями, а нарастанием активности за часы/сутки.
+    """
+    df = df_raw.copy()
+    df['_orig_idx'] = np.arange(len(df))
+
+    # Извлекаем час из itim (формат HHMMSS)
+    df['_hour'] = (df['itim'].astype(int) // 10000)
+
+    # Окно идентифицируется по idat + номер окна внутри суток
+    df['_window_id'] = (
+        df['idat'].astype(str) + '_' +
+        (df['_hour'] // window_hours).astype(str)
+    )
+
+    # Агрегаты по окну
+    window_stats = df.groupby('_window_id').agg(
+        count=('e', 'count'),
+        total_energy=('e', 'sum'),
+    ).reset_index()
+
+    # Z-score для числа событий и суммарной энергии
+    def zscore_col(series):
+        std = series.std()
+        if std == 0 or len(series) < 3:
+            return pd.Series(np.zeros(len(series)), index=series.index)
+        return (series - series.mean()) / std
+
+    window_stats['z_count'] = zscore_col(window_stats['count'])
+    window_stats['z_energy'] = zscore_col(window_stats['total_energy'])
+
+    window_stats['is_slow_anomaly'] = (
+        (window_stats['z_count'] > zscore_threshold) |
+        (window_stats['z_energy'] > zscore_threshold)
+    )
+
+    # Переносим метку обратно на каждое событие
+    anomalous_windows = set(
+        window_stats.loc[window_stats['is_slow_anomaly'], '_window_id']
+    )
+    result = df['_window_id'].isin(anomalous_windows)
+    result.index = df['_orig_idx']
+
+    return result.sort_index()
 
 
 def _load_events(path: str) -> pd.DataFrame:

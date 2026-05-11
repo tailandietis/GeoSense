@@ -1,6 +1,7 @@
 @page "/ml-dashboard"
 
 @using GeoDa.BlazorWebApp.Services.MLBuilder
+@using GeoDa.Application.GeneralForecasts.Repository.ObjectInfos.Dtos
 
 <HeaderBase Text="ML Dashboard — Интеллектуальный мониторинг" Level="2" />
 
@@ -10,7 +11,19 @@
         <Space Direction="DirectionVHType.Vertical" Size=@("middle") Style="width:100%">
 
             <SpaceItem>
-                <Space Size=@("middle") Align="center">
+                <Space Size=@("middle") Align="center" Wrap="true">
+                    <SpaceItem>
+                        <span>Объект:&nbsp;</span>
+                        <Select TItem="ObjectInfoDto"
+                                TItemValue="int?"
+                                DataSource="_objects"
+                                @bind-Value="ObjectState.SelectedObjId"
+                                ValueName="@nameof(ObjectInfoDto.Obj)"
+                                LabelName="@nameof(ObjectInfoDto.ObjName)"
+                                Style="width:220px"
+                                Placeholder="Выберите объект"
+                                OnSelectedItemChanged="(ObjectInfoDto o) => OnObjectSelected(o?.Obj)" />
+                    </SpaceItem>
                     <SpaceItem>
                         <Button Type="@ButtonType.Primary"
                                 Loading="@_isTraining"

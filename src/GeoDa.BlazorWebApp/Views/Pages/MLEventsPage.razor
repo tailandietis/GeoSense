@@ -9,6 +9,10 @@
     <SpaceItem>
         <Space Size=@("middle") Align="center" Wrap="true">
             <SpaceItem>
+                <span>Период:&nbsp;</span>
+                <RangePicker TValue="DateTime?[]" Value="_dateRange" ValueChanged="OnDateRangeChanged" Style="width:260px" />
+            </SpaceItem>
+            <SpaceItem>
                 <Button Type="@ButtonType.Primary"
                         Icon="play-circle"
                         Loading="_isRunning"
@@ -33,6 +37,45 @@
             }
         </Space>
     </SpaceItem>
+
+    @if (_xseisState != null)
+    {
+        <SpaceItem>
+            <Card Title="Состояние горного массива по XSeis (томография)" Size="small">
+                <Space Size=@("middle") Wrap="true" Align="center">
+                    <SpaceItem>
+                        <span style="font-size:13px; color:#8c8c8c;">Состояние массива:&nbsp;</span>
+                        <Tag Color="@_xseisState.MassifStateColor">@_xseisState.MassifStateLabel</Tag>
+                    </SpaceItem>
+                    @if (_xseisState.HasData)
+                    {
+                        <SpaceItem>
+                            <span style="font-size:13px; color:#8c8c8c;">Неоднородность:&nbsp;</span>
+                            <Tag Color="default">@_xseisState.HeterRateLabel</Tag>
+                        </SpaceItem>
+                        <SpaceItem>
+                            <span style="font-size:13px; color:#8c8c8c;">D-max (срез):&nbsp;</span>
+                            <span style="font-size:13px;">@_xseisState.DMaxSlice.ToString("F3")</span>
+                        </SpaceItem>
+                        <SpaceItem>
+                            <span style="font-size:13px; color:#8c8c8c;">Зона разуплотнения:&nbsp;</span>
+                            <span style="font-size:13px;">@(_xseisState.IsMaxDecomp ? "Есть (макс.)" : _xseisState.IsMinDecomp ? "Есть (мин.)" : "Не обнаружена")</span>
+                        </SpaceItem>
+                        <SpaceItem>
+                            <span style="font-size:13px; color:#8c8c8c;">Дата замера:&nbsp;</span>
+                            <span style="font-size:13px;">@_xseisState.Dt.ToString("dd.MM.yyyy HH:mm")</span>
+                        </SpaceItem>
+                    }
+                    else
+                    {
+                        <SpaceItem>
+                            <span style="font-size:13px; color:#8c8c8c;">Данные XSeis недоступны для данного объекта</span>
+                        </SpaceItem>
+                    }
+                </Space>
+            </Card>
+        </SpaceItem>
+    }
 
     @if (_result != null && _result.Success)
     {
@@ -66,9 +109,16 @@
                 </div>
                 <div style="flex:1; min-width:140px;">
                     <Card>
-                        <Statistic Title="Аномалий (IF)"
+                        <Statistic Title="Точечные аномалии (IF)"
                                    Value="@_result.AnomalyCount.ToString()"
                                    ValueStyle="color:#722ed1" />
+                    </Card>
+                </div>
+                <div style="flex:1; min-width:140px;">
+                    <Card>
+                        <Statistic Title="Медленные аномалии"
+                                   Value="@_result.SlowAnomalyCount.ToString()"
+                                   ValueStyle="color:#d46b08" />
                     </Card>
                 </div>
             </div>
@@ -118,14 +168,22 @@
                     <Column Title="Класс ML" TData="string" Width="140">
                         <Tag Color="@context.AntdColor">@context.LabelName</Tag>
                     </Column>
-                    <Column Title="Аномалия (IF)" TData="string" Width="130">
-                        @if (context.IsAnomaly)
+                    <Column Title="Тип аномалии" TData="string" Width="180">
+                        @if (context.IsAnomaly && context.IsSlowAnomaly)
                         {
-                            <Tag Color="error">Аномалия</Tag>
+                            <Tag Color="error">Точечная + Медленная</Tag>
+                        }
+                        else if (context.IsAnomaly)
+                        {
+                            <Tag Color="purple">Точечная (IF)</Tag>
+                        }
+                        else if (context.IsSlowAnomaly)
+                        {
+                            <Tag Color="orange">Медленная</Tag>
                         }
                         else
                         {
-                            <Tag Color="default">Норма</Tag>
+                            <Tag Color="default">—</Tag>
                         }
                     </Column>
                 </Table>

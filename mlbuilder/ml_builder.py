@@ -2,6 +2,9 @@ import argparse
 import sys
 import os
 
+import numpy as np
+import pandas as pd
+
 from settings.settings_service import load_settings
 from emulator import generate_events
 from feature_engineering import build_features
@@ -21,6 +24,8 @@ def parse_args() -> argparse.Namespace:
                         help="Директория для результатов")
     parser.add_argument("--thesis_figures", default=None,
                         help="Директория для графиков ПЗ (только в режиме train)")
+    parser.add_argument("--real_events", default=None,
+                        help="[train] Путь к CSV реальных событий для смешанного обучения")
     # Аргументы predict режима
     parser.add_argument("--events", default=None,
                         help="[predict] Путь к CSV с событиями")
@@ -63,7 +68,16 @@ def main():
     print(f"\nГенерация синтетических событий: {total} шт.")
 
     df_raw = generate_events(settings, random_seed=settings.emulator.random_seed)
-    print(f"Сгенерировано событий: {len(df_raw)}")
+    print(f"Сгенерировано синтетических событий: {len(df_raw)}")
+
+    if args.real_events and os.path.exists(args.real_events):
+        df_real = _load_and_label_real(args.real_events)
+        print(f"Реальных событий загружено и размечено: {len(df_real)}")
+        df_raw = pd.concat([df_raw, df_real], ignore_index=True).sample(
+            frac=1, random_state=42).reset_index(drop=True)
+        print(f"Итого событий в обучающей выборке: {len(df_raw)}")
+    else:
+        print("Реальные данные не переданы — обучение только на синтетике")
 
     print("\nРасчёт признаков...")
     df = build_features(df_raw)
@@ -91,6 +105,35 @@ def main():
         print(f"  Energy Index:          {bl['energy_index']['f1_macro']:.4f}")
         print(f"  XGBoost:               {xgb['f1_macro']:.4f}")
     print("\nГотово.")
+
+
+def _load_and_label_real(path: str) -> pd.DataFrame:
+    """
+    Загружает реальные события и размечает их по перцентилям энергии.
+    Разбивка 60/20/12/8% соответствует физически обоснованному
+    соотношению классов опасности в горном массиве.
+    """
+    df = pd.read_csv(path)
+    for col in ["ampl", "magn", "proc", "np_actual", "rq_min", "rq_max"]:
+        if col not in df.columns:
+            df[col] = np.nan
+    if "obj" not in df.columns:
+        df["obj"] = 1
+
+    df = df[df["e"] > 0].dropna(subset=["e"]).copy()
+
+    log_e = np.log(df["e"].values)
+    q60 = np.percentile(log_e, 60)
+    q80 = np.percentile(log_e, 80)
+    q92 = np.percentile(log_e, 92)
+
+    labels = np.zeros(len(df), dtype=int)
+    labels[(log_e >= q60) & (log_e < q80)] = 1
+    labels[(log_e >= q80) & (log_e < q92)] = 2
+    labels[log_e >= q92] = 3
+    df["label"] = labels
+
+    return df
 
 
 if __name__ == "__main__":

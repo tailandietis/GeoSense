@@ -2,13 +2,13 @@
 
 <HeaderBase Text="ML vs GeoDa — Сравнение методов оценки риска" Level="2" />
 
-@if (!_hasData)
+@if (!string.IsNullOrEmpty(_errorMessage))
 {
-    <Alert Type="@AlertType.Info"
+    <Alert Type="@AlertType.Warning"
            Message="Данные недоступны"
-           Description="Для отображения сравнения необходимо подключение к базе данных и обученная ML-модель. Убедитесь, что модель обучена в разделе ML Dashboard."
+           Description="@_errorMessage"
            ShowIcon="true"
-           Style="max-width:600px; margin-bottom:24px;" />
+           Style="max-width:700px; margin-bottom:24px;" />
 }
 
 <Space Direction="DirectionVHType.Vertical" Size=@("large") Style="width:100%">
@@ -51,12 +51,13 @@
             <Space Size=@("middle") Wrap="true">
                 <SpaceItem>
                     <span>Период:&nbsp;</span>
-                    <RangePicker TValue="DateTime?[]" @bind-Value="_dateRange" Style="width:280px" />
+                    <RangePicker TValue="DateTime?[]" Value="_dateRange" ValueChanged="OnDateRangeChanged" Style="width:280px" />
                 </SpaceItem>
                 <SpaceItem>
                     <span>Показать:&nbsp;</span>
                     <Select TItem="string" TItemValue="string"
-                            @bind-Value="_filterMode"
+                            Value="_filterMode"
+                            ValueChanged="OnFilterModeChanged"
                             Style="width:180px">
                         <SelectOptions>
                             <SelectOption TItem="string" TItemValue="string" Value="@("all")" Label="Все события" />

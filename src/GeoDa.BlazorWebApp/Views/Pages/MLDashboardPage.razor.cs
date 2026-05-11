@@ -1,4 +1,5 @@
 using AntDesign;
+using GeoDa.Application.GeneralForecasts.Repository.ObjectInfos.Dtos;
 using GeoDa.BlazorWebApp.Services.MLBuilder;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Logging;
@@ -15,29 +16,40 @@ public partial class MLDashboardPage : ComponentBase
     [Inject] private IMessageService MessageService { get; set; } = default!;
     [Inject] private ILogger<MLDashboardPage> Logger { get; set; } = default!;
     [Inject] private IOptions<MLBuilderSettings> MLSettings { get; set; } = default!;
+    [Inject] private MLObjectStateService ObjectState { get; set; } = default!;
 
     private bool _isTraining = false;
     private MLTrainResult? _trainResult;
     private string? _errorMessage;
     private Dictionary<string, string> _plotFiles = new();
+    private List<ObjectInfoDto> _objects = new();
 
     protected override void OnInitialized()
     {
-        if (MLBuilderService.IsTrainResultReady())
-        {
-            _trainResult = MLBuilderService.GetLastTrainResult();
-            LoadPlotFiles();
-        }
+        _objects = ObjectState.GetObjects();
+    }
+
+    private void OnObjectSelected(int? objId)
+    {
+        ObjectState.SelectedObjId = objId;
+        var obj = _objects.Find(o => o.Obj == objId);
+        ObjectState.SelectedObjName = obj?.ObjName.Trim() ?? "";
     }
 
     private async Task TrainModel()
     {
+        if (ObjectState.SelectedObjId is null)
+        {
+            await MessageService.Warning("Выберите объект для обучения");
+            return;
+        }
+
         _isTraining = true;
         _errorMessage = null;
         _trainResult = null;
         StateHasChanged();
 
-        _trainResult = await MLBuilderService.TrainAsync(string.Empty);
+        _trainResult = await MLBuilderService.TrainAsync(ObjectState.SelectedObjId.Value);
 
         if (_trainResult.Success)
         {

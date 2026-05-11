@@ -16,8 +16,8 @@ public partial class HelpSelect
     {
         HelpData = new()
         {
-            new() { Id = HelpDataModel.MsMethodologyId, Name = "Методика риска возникновения ДЯ" },
-            new() { Id = HelpDataModel.MikonGeoMethodologyId, Name = "Методика оценки удароопасности «Микон-Гео»" }
+            new() { Id = HelpDataModel.MsMethodologyId, Name = "Методика риска возникновения ДЯ (параметр F)" },
+            new() { Id = HelpDataModel.MlMethodologyId, Name = "Методика ML-классификации сейсмических событий GeoSense" }
         };
     }
 
