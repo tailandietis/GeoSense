@@ -120,6 +120,15 @@ public class Startup
             RequestPath = "/ml-plots"
         });
 
+        var volumeImgPath = _configuration["VolumetricBuilder:WebRootImgPath"] ?? ".\\wwwroot\\img";
+        volumeImgPath = Path.GetFullPath(volumeImgPath);
+        Directory.CreateDirectory(volumeImgPath);
+        app.UseStaticFiles(new StaticFileOptions
+        {
+            FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(volumeImgPath),
+            RequestPath = "/img"
+        });
+
         app.UseSwagger();
         app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "WebApplication3 v1"));
 
