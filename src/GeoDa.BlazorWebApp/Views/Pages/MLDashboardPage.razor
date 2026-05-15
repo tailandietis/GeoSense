@@ -58,6 +58,29 @@
                 </SpaceItem>
 
                 <SpaceItem>
+                    <Space Size=@("middle") Wrap="true">
+                        @foreach (var plot in _plotFiles)
+                        {
+                            @if (plot.Key != "Сравнение с baseline" && plot.Key != "Устойчивость к шуму")
+                            {
+                                <SpaceItem>
+                                    <Card Title="@plot.Key" Style="width:480px">
+                                        <img src="@plot.Value" style="width:100%" />
+                                    </Card>
+                                </SpaceItem>
+                            }
+                        }
+                    </Space>
+                </SpaceItem>
+            }
+        </Space>
+    </TabPane>
+
+    <TabPane Key="comparison" Tab="Сравнение методов">
+        <Space Direction="DirectionVHType.Vertical" Size=@("middle") Style="width:100%">
+            @if (_trainResult != null && _trainResult.Success)
+            {
+                <SpaceItem>
                     <Card Title="Сравнение с пороговыми методами" Style="max-width:700px">
                         <Table DataSource="@GetBaselineComparison()" TItem="CompareRow" Size="@TableSize.Small">
                             <Column Title="Метод" DataIndex="@nameof(CompareRow.Method)" TData="string" />
@@ -66,7 +89,6 @@
                         </Table>
                     </Card>
                 </SpaceItem>
-
                 <SpaceItem>
                     <Card Title="Устойчивость к погрешностям датчиков" Style="max-width:700px">
                         <Table DataSource="@GetRobustnessRows()" TItem="RobustnessRow" Size="@TableSize.Small">
@@ -76,18 +98,27 @@
                         </Table>
                     </Card>
                 </SpaceItem>
-
+                @if (_plotFiles.ContainsKey("Сравнение с baseline"))
+                {
+                    <SpaceItem>
+                        <Card Title="Сравнение с baseline" Style="width:480px">
+                            <img src="@_plotFiles["Сравнение с baseline"]" style="width:100%" />
+                        </Card>
+                    </SpaceItem>
+                }
+                @if (_plotFiles.ContainsKey("Устойчивость к шуму"))
+                {
+                    <SpaceItem>
+                        <Card Title="Устойчивость к шуму" Style="width:480px">
+                            <img src="@_plotFiles["Устойчивость к шуму"]" style="width:100%" />
+                        </Card>
+                    </SpaceItem>
+                }
+            }
+            else
+            {
                 <SpaceItem>
-                    <Space Size=@("middle") Wrap="true">
-                        @foreach (var plot in _plotFiles)
-                        {
-                            <SpaceItem>
-                                <Card Title="@plot.Key" Style="width:480px">
-                                    <img src="@plot.Value" style="width:100%" />
-                                </Card>
-                            </SpaceItem>
-                        }
-                    </Space>
+                    <Text Type="@("secondary")">Обучите модель на вкладке «Обучение модели»</Text>
                 </SpaceItem>
             }
         </Space>
