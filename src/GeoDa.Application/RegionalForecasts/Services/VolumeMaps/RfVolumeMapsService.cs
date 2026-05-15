@@ -55,55 +55,24 @@ public class RfVolumeMapsService : IRfVolumeMapsService
 
         try
         {
-            var builderDir    = _settings.BuilderDir;
-            var dataDir       = Path.Combine(builderDir, "data");
-            var settingsDir   = Path.Combine(builderDir, "settings");
-            var builderImgDir = Path.Combine(builderDir, "wwwroot", "img");
-
-            Directory.CreateDirectory(dataDir);
-            Directory.CreateDirectory(settingsDir);
-            Directory.CreateDirectory(builderImgDir);
-
             var timestamp    = DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss");
             var htmlFileName = $"events_volume_{objectId}_{timestamp}.html";
 
-            ClearPreviousFiles(objectId, dataDir, settingsDir, builderImgDir);
-
-            var eventsFilePath   = Path.GetFullPath(Path.Combine(dataDir,     $"events_{objectId}_{timestamp}.csv"));
-            var settingsFilePath = Path.GetFullPath(Path.Combine(settingsDir, $"volume_settings_{objectId}_{timestamp}.json"));
-
-            WriteEventsFile(eventsFilePath, events);
-
-            var geometry  = _geometryRepository.SelectGeometryData(objectId);
-            var geophones = _geophoneRepository.SelectAllGeophonsData(objectId);
-
-            if (geophones == null || geophones.Count == 0)
-            {
-                _logger.LogError("Geophones not found for objectId: {ObjectId}", objectId);
-                return null;
-            }
-
-            WriteSettingsFile(settingsFilePath, htmlFileName, builderDir, geometry, geophones, validLayouts);
-
-            var buildResult = RunBuilder(eventsFilePath, settingsFilePath, builderDir);
-            if (!buildResult.IsSuccess)
-            {
-                _logger.LogError("volume_builder error: {Error}", buildResult.ErrorMessage);
-                return null;
-            }
-
-            var builtHtmlPath = Path.Combine(builderImgDir, htmlFileName);
-            if (!File.Exists(builtHtmlPath))
-            {
-                _logger.LogError("HTML file not found after build: {Path}", builtHtmlPath);
-                return null;
-            }
-
-            var webRootImgDir = _settings.WebRootImgPath;
+            var webRootImgDir = Path.GetFullPath(_settings.WebRootImgPath);
             Directory.CreateDirectory(webRootImgDir);
-            File.Copy(builtHtmlPath, Path.Combine(webRootImgDir, htmlFileName), overwrite: true);
+            var outputHtmlPath = Path.Combine(webRootImgDir, htmlFileName);
 
-            return $"/img/{htmlFileName}";
+            var geometry = _geometryRepository.SelectGeometryData(objectId);
+
+            var pythonResult = TryRunPythonMap(events, validLayouts, geometry, outputHtmlPath);
+            if (pythonResult.IsSuccess)
+            {
+                _logger.LogInformation("generate_3d_map.py успешно создал карту: {Path}", outputHtmlPath);
+                return $"/img/{htmlFileName}";
+            }
+
+            _logger.LogWarning("generate_3d_map.py не удался ({Error}), fallback на volume_builder", pythonResult.ErrorMessage);
+            return FallbackVolumeBuilder(objectId, events, validLayouts, geometry, timestamp, htmlFileName, webRootImgDir);
         }
         catch (Exception ex)
         {
@@ -112,17 +81,152 @@ public class RfVolumeMapsService : IRfVolumeMapsService
         }
     }
 
-    // Private helpers
+    // Python map (generate_3d_map.py)
+
+    private (bool IsSuccess, string ErrorMessage) TryRunPythonMap(
+        IReadOnlyList<Event> events,
+        IReadOnlyList<VolumeLayoutConfig> layouts,
+        GeometryDto geometry,
+        string outputHtmlPath)
+    {
+        var mlDir = _settings.MlBuilderDir;
+        if (string.IsNullOrWhiteSpace(mlDir))
+            return (false, "MlBuilderDir не задан в настройках");
+
+        var pythonExe = Path.GetFullPath(Path.Combine(mlDir, "venv", "Scripts", "python.exe"));
+        var scriptPath = Path.GetFullPath(Path.Combine(mlDir, "generate_3d_map.py"));
+
+        if (!File.Exists(pythonExe) || !File.Exists(scriptPath))
+            return (false, $"python.exe или generate_3d_map.py не найден");
+
+        var tmpCsv = Path.Combine(Path.GetDirectoryName(outputHtmlPath)!, $"_tmp_events_{Guid.NewGuid():N}.csv");
+        try
+        {
+            WriteEventsCsvForPython(tmpCsv, events);
+
+            var args = new StringBuilder();
+            args.Append($"\"{scriptPath}\" --events \"{tmpCsv}\" --output \"{outputHtmlPath}\" --z_scale 2.0");
+
+            foreach (var layout in layouts.OrderBy(l => l.ZCoordinate ?? (int)geometry.ZMin))
+            {
+                var z = layout.ZCoordinate ?? (int)geometry.ZMin;
+                args.Append($" \"--layout={layout.FilePath}|{z}|{layout.Opacity.ToString(CultureInfo.InvariantCulture)}\"");
+            }
+
+            var startInfo = new ProcessStartInfo
+            {
+                FileName               = pythonExe,
+                Arguments              = args.ToString(),
+                WorkingDirectory       = mlDir,
+                UseShellExecute        = false,
+                RedirectStandardOutput = true,
+                RedirectStandardError  = true,
+                CreateNoWindow         = true,
+            };
+
+            using var process = Process.Start(startInfo);
+            if (process is null) return (false, "Не удалось запустить процесс");
+
+            var stderr = process.StandardError.ReadToEnd();
+            process.WaitForExit();
+
+            if (process.ExitCode != 0)
+                return (false, $"ExitCode {process.ExitCode}: {stderr}");
+
+            if (!File.Exists(outputHtmlPath))
+                return (false, "HTML файл не создан скриптом");
+
+            return (true, string.Empty);
+        }
+        finally
+        {
+            if (File.Exists(tmpCsv)) File.Delete(tmpCsv);
+        }
+    }
+
+    private static void WriteEventsCsvForPython(string filePath, IReadOnlyList<Event> events)
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine("x,y,z,e");
+        foreach (var e in events)
+        {
+            sb.AppendLine(string.Join(",",
+                ((int)Math.Round((double)e.X)).ToString(CultureInfo.InvariantCulture),
+                ((int)Math.Round((double)e.Y)).ToString(CultureInfo.InvariantCulture),
+                ((int)Math.Round((double)e.Z)).ToString(CultureInfo.InvariantCulture),
+                e.E.ToString("0.0000", CultureInfo.InvariantCulture)));
+        }
+        File.WriteAllText(filePath, sb.ToString(), Encoding.UTF8);
+    }
+
+    // Fallback: volume_builder.exe
+
+    private string? FallbackVolumeBuilder(
+        int objectId,
+        IReadOnlyList<Event> events,
+        IReadOnlyList<VolumeLayoutConfig> validLayouts,
+        GeometryDto geometry,
+        string timestamp,
+        string htmlFileName,
+        string webRootImgDir)
+    {
+        var builderDir    = Path.GetFullPath(_settings.BuilderDir);
+        var dataDir       = Path.GetFullPath(Path.Combine(builderDir, "data"));
+        var settingsDir   = Path.GetFullPath(Path.Combine(builderDir, "settings"));
+        var builderImgDir = Path.GetFullPath(Path.Combine(builderDir, "wwwroot", "img"));
+
+        Directory.CreateDirectory(dataDir);
+        Directory.CreateDirectory(settingsDir);
+        Directory.CreateDirectory(builderImgDir);
+
+        ClearPreviousFiles(objectId, dataDir, settingsDir, builderImgDir);
+
+        var eventsFilePath   = Path.Combine(dataDir,     $"events_{objectId}_{timestamp}.csv");
+        var settingsFilePath = Path.Combine(settingsDir, $"volume_settings_{objectId}_{timestamp}.json");
+
+        WriteEventsFile(eventsFilePath, events);
+
+        var geophones = _geophoneRepository.SelectAllGeophonsData(objectId) ?? new List<GeophoneDto>();
+        WriteSettingsFile(settingsFilePath, htmlFileName, builderDir, geometry, geophones, validLayouts);
+
+        var buildResult = RunBuilder(eventsFilePath, settingsFilePath, builderDir);
+        if (!buildResult.IsSuccess)
+        {
+            _logger.LogError("volume_builder error: {Error}", buildResult.ErrorMessage);
+            return null;
+        }
+
+        var builtHtmlPath = Path.Combine(builderImgDir, htmlFileName);
+        if (!File.Exists(builtHtmlPath))
+        {
+            var found = new[]
+            {
+                Path.Combine(builderDir, "wwwroot", "img", htmlFileName),
+                Path.GetFullPath(Path.Combine(builderDir, "wwwroot", "img", htmlFileName)),
+            }.FirstOrDefault(File.Exists);
+
+            if (found is null)
+            {
+                _logger.LogError("HTML file not found after build: {Path}", builtHtmlPath);
+                return null;
+            }
+            builtHtmlPath = found;
+        }
+
+        EnhanceHtml(builtHtmlPath);
+        File.Copy(builtHtmlPath, Path.Combine(webRootImgDir, htmlFileName), overwrite: true);
+        return $"/img/{htmlFileName}";
+    }
+
+    // Helpers
 
     private void WriteEventsFile(string filePath, IReadOnlyList<Event> events)
     {
         var lines = new List<string>(events.Count + 1) { "D T X Y Z E" };
-
         lines.AddRange(events.Select(e =>
             $"{e.Dt:dd.MM.yy} {e.Dt:HH:mm:ss} " +
             $"{(int)Math.Round((double)e.X)} {(int)Math.Round((double)e.Y)} {(int)Math.Round((double)e.Z)} " +
             $"{e.E.ToString("0.0000", CultureInfo.InvariantCulture)}"));
-
         File.WriteAllLines(filePath, lines, Encoding.UTF8);
     }
 
@@ -144,9 +248,6 @@ public class RfVolumeMapsService : IRfVolumeMapsService
         var layoutsData = layouts.Select(l =>
         {
             var zCoor = l.ZCoordinate ?? zMin;
-            if (l.ZCoordinate is null)
-                _logger.LogInformation("VolumeLayoutZCoor not set for layout {FilePath}, using z_min: {ZMin}", l.FilePath, zMin);
-
             return new { file_name = l.FilePath, z_coor = zCoor, opacity = l.Opacity };
         }).ToList();
 
@@ -171,7 +272,6 @@ public class RfVolumeMapsService : IRfVolumeMapsService
     private (bool IsSuccess, string ErrorMessage) RunBuilder(string eventsFilePath, string settingsFilePath, string builderDir)
     {
         var exePath = Path.Combine(builderDir, "volume_builder.exe");
-
         if (!File.Exists(exePath))
             return (false, $"volume_builder.exe не найден: {exePath}");
 
@@ -189,13 +289,9 @@ public class RfVolumeMapsService : IRfVolumeMapsService
         try
         {
             using var process = Process.Start(startInfo);
-
-            if (process is null)
-                return (false, "Не удалось запустить процесс volume_builder");
-
+            if (process is null) return (false, "Не удалось запустить процесс volume_builder");
             var error = process.StandardError.ReadToEnd();
             process.WaitForExit();
-
             return process.ExitCode == 0
                 ? (true, string.Empty)
                 : (false, $"ExitCode {process.ExitCode}: {error}");
@@ -215,16 +311,49 @@ public class RfVolumeMapsService : IRfVolumeMapsService
 
     private static void DeleteMatchingFiles(string dir, string prefix, string extension)
     {
-        if (!Directory.Exists(dir))
-            return;
-
+        if (!Directory.Exists(dir)) return;
         foreach (var file in new DirectoryInfo(dir).GetFiles())
         {
             if (file.Name.StartsWith(prefix, StringComparison.Ordinal)
                 && file.Extension.Equals(extension, StringComparison.OrdinalIgnoreCase))
-            {
                 file.Delete();
-            }
         }
+    }
+
+    private static void EnhanceHtml(string htmlPath)
+    {
+        var html = File.ReadAllText(htmlPath, Encoding.UTF8);
+        const string enhanceScript = @"
+<script>
+(function() {
+    function enhance() {
+        var divs = document.querySelectorAll('.plotly-graph-div');
+        if (!divs || divs.length === 0) { setTimeout(enhance, 200); return; }
+        divs.forEach(function(gd) {
+            if (!gd.data || gd.data.length === 0) return;
+            var trace = gd.data[0];
+            var colors = trace.marker && Array.isArray(trace.marker.color) ? trace.marker.color : null;
+            if (colors) {
+                var sorted = colors.slice().sort(function(a,b){return a-b;});
+                var p5  = sorted[Math.max(0, Math.floor(sorted.length * 0.05))];
+                var p95 = sorted[Math.min(sorted.length-1, Math.floor(sorted.length * 0.95))];
+                Plotly.restyle(gd, {'marker.cmin': [p5], 'marker.cmax': [p95], 'marker.colorscale': ['Jet']}, [0]);
+            }
+            Plotly.relayout(gd, {'scene.aspectmode': 'manual', 'scene.aspectratio': {x: 1, y: 1, z: 0.4}});
+        });
+    }
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function(){ setTimeout(enhance, 500); });
+    } else {
+        setTimeout(enhance, 500);
+    }
+})();
+</script>
+</body>";
+        if (html.Contains("</body>"))
+            html = html.Replace("</body>", enhanceScript, StringComparison.OrdinalIgnoreCase);
+        else
+            html += enhanceScript;
+        File.WriteAllText(htmlPath, html, Encoding.UTF8);
     }
 }

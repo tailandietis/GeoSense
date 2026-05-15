@@ -14,4 +14,9 @@ public class VolumetricBuilderSettings
     /// </summary>
     public string WebRootImgPath { get; set; } = string.Empty;
 
+    /// <summary>
+    /// Путь к директории mlbuilder (содержит generate_3d_map.py и venv/).
+    /// Если указан — используется улучшенная Python-визуализация вместо volume_builder.exe.
+    /// </summary>
+    public string MlBuilderDir { get; set; } = string.Empty;
 }
